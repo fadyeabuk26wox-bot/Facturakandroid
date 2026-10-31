@@ -1,0 +1,46 @@
+name: Compilar APK de FacturaK
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Localizar el proyecto
+        run: |
+          F=$(find . -name capacitor.config.json -not -path "*/node_modules/*" | head -1)
+          if [ -z "$F" ]; then echo "::error::No se encontró capacitor.config.json. Sube el CONTENIDO del zip al repositorio."; find . -maxdepth 2 -not -path "./.git*"; exit 1; fi
+          echo "APPDIR=$(dirname "$F")" >> "$GITHUB_ENV"
+          echo "Proyecto en: $(dirname "$F")"
+      - name: Instalar dependencias
+        working-directory: ${{ env.APPDIR }}
+        run: npm install --no-audit --no-fund
+      - name: Empaquetar puente nativo
+        working-directory: ${{ env.APPDIR }}
+        run: npm run build:bridge
+      - name: Crear proyecto Android
+        working-directory: ${{ env.APPDIR }}
+        run: |
+          npx cap add android
+          node scripts/patch-manifest.js
+          node scripts/patch-icons.js
+          npx cap sync android
+      - name: Compilar APK
+        working-directory: ${{ env.APPDIR }}/android
+        run: ./gradlew assembleDebug --no-daemon
+      - name: Guardar APK
+        uses: actions/upload-artifact@v5
+        with:
+          name: FacturaK-APK
+          path: ${{ env.APPDIR }}/android/app/build/outputs/apk/debug/app-debug.apk
