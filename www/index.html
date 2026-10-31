@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' http: https: ws: wss:; frame-src 'self' data: blob: about:; media-src 'self' data: blob:">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>FacturaK - Sistema de Inventario y Facturación</title>
+<link rel="stylesheet" href="css/tailwind.min.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/extras.css">
+<link rel="stylesheet" href="css/mobile.css">
+</head>
+<body class="font-sans text-dark333 h-screen overflow-hidden geo-circulo acabado-solido">
+
+<!-- ============ SPLASH SCREEN (animación de bienvenida) ============ -->
+<div id="splash-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br from-primary to-[#00305e]" style="transition: opacity .45s ease;">
+  <div class="flex items-center gap-3 animate-slideUp">
+    <div class="w-16 h-16 rounded-2xl bg-teal flex items-center justify-center font-extrabold text-3xl text-primary shadow-2xl animate-pulseSoft">K</div>
+    <div class="text-white">
+      <div class="text-4xl font-extrabold tracking-tight leading-none">FacturaK</div>
+      <div class="text-xs uppercase tracking-[0.3em] text-white/70 mt-1">Inventario y Facturación</div>
+    </div>
+  </div>
+  <div class="mt-9">
+    <div class="spinner-circle"></div>
+  </div>
+</div>
+
+<!-- ============ PANTALLA DE ACCESO v2 (Bienvenida · Perfil · Login · Recuperar · Rubro · Registro) ============ -->
+<div id="auth-screen" class="hidden fixed inset-0 z-[90] fk-fondo overflow-y-auto">
+  <div class="min-h-full flex">
+
+    <!-- Panel de marca (pantallas anchas) -->
+    <aside class="auth-marca hidden lg:flex w-[42%] max-w-[600px] flex-col justify-between p-12 relative overflow-hidden">
+      <div class="auth-forma auth-forma-1"></div><div class="auth-forma auth-forma-2"></div><div class="auth-forma auth-forma-3"></div>
+      <div class="relative flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl bg-teal flex items-center justify-center font-extrabold text-2xl text-primary shadow-lg">K</div>
+        <div><div class="text-2xl font-extrabold tracking-tight leading-none">FacturaK</div>
+          <div class="text-[10px] uppercase tracking-[0.3em] opacity-70 mt-1">Inventario y Facturación</div></div>
+      </div>
+      <div class="relative">
+        <h1 class="text-4xl font-extrabold leading-tight tracking-tight">Tu negocio,<br>en orden y bajo control.</h1>
+        <p class="opacity-75 mt-4 max-w-md text-sm leading-relaxed">Ventas, inventario, créditos y facturación en una sola aplicación que trabaja sin internet y guarda tus datos en este equipo.</p>
+        <ul class="mt-8 flex flex-col gap-3 text-sm">
+          <li class="flex items-center gap-3"><span class="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center">✓</span>Punto de venta con lector de códigos</li>
+          <li class="flex items-center gap-3"><span class="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center">✓</span>Créditos con cuotas, moras y cobranza por WhatsApp</li>
+          <li class="flex items-center gap-3"><span class="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center">✓</span>Ticket fiscal 58mm, facturas PDF y correo</li>
+          <li class="flex items-center gap-3"><span class="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center">✓</span>Perfiles de Administrador, Cajero y Autoservicio</li>
+        </ul>
+      </div>
+      <div class="relative text-[11px] opacity-50">FacturaK v2 · Datos locales y respaldos automáticos</div>
+    </aside>
+
+    <!-- Panel del formulario -->
+    <main class="flex-1 flex p-5 sm:p-10">
+      <div class="w-full max-w-[540px] m-auto">
+        <div class="lg:hidden flex items-center justify-center gap-2 mb-6">
+          <div class="w-10 h-10 rounded-xl bg-teal flex items-center justify-center font-extrabold text-primary">K</div>
+          <div class="text-xl font-extrabold text-dark333">FacturaK</div>
+        </div>
+
+        <div class="auth-card p-7 sm:p-9 animate-slideUp">
+          <!-- Barra superior: regresar + pasos -->
+          <div id="auth-topbar" class="hidden items-center justify-between gap-3 mb-6">
+            <button type="button" id="btn-volver-landing" class="btn-atras">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m0 0l6-6m-6 6l6 6"/></svg>
+              <span id="btn-volver-texto">Atrás</span>
+            </button>
+            <div id="auth-pasos" class="pasos hidden">
+              <div class="paso" data-paso="1"><span class="num">1</span>Módulos</div><div class="paso-linea"></div>
+              <div class="paso" data-paso="2"><span class="num">2</span>Empresa</div><div class="paso-linea"></div>
+              <div class="paso" data-paso="3"><span class="num">3</span>Listo</div>
+            </div>
+          </div>
+
+          <h2 id="auth-title" class="text-2xl font-extrabold text-dark333 tracking-tight">Bienvenido</h2>
+          <p id="auth-subtitle" class="text-sm text-greym mt-1 mb-6">¿Qué deseas hacer?</p>
+
+          <div id="auth-error" class="hidden bg-accent/10 text-accent text-sm font-semibold rounded-xl px-4 py-3 mb-4"></div>
+          <div id="auth-success" class="hidden bg-teal/10 text-teal text-sm font-semibold rounded-xl px-4 py-3 mb-4"></div>
+
+          <!-- BIENVENIDA -->
+          <div id="auth-landing" class="flex flex-col gap-3">
+            <button type="button" id="btn-landing-login" class="auth-opcion">
+              <div class="auth-opcion-icono bg-primary text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg></div>
+              <div><div class="font-bold text-dark333">Iniciar sesión</div><div class="text-xs text-greym mt-0.5">Entra con tu código de empresa, usuario y contraseña.</div></div>
+              <svg class="flecha w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
+            <button type="button" id="btn-landing-registro" class="auth-opcion">
+              <div class="auth-opcion-icono bg-teal/15 text-teal"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg></div>
+              <div><div class="font-bold text-dark333">Crear cuenta de empresa</div><div class="text-xs text-greym mt-0.5">Configura tu negocio en dos pasos.</div></div>
+              <svg class="flecha w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+
+          <!-- SELECCIÓN DE PERFIL -->
+          <div id="login-rol-selector" class="hidden grid-cols-2 gap-3">
+            <button type="button" data-rol="admin" class="login-rol-card rol-card">
+              <div class="rol-icono"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
+              <div class="font-bold text-sm text-dark333">Administrador</div><div class="text-[11px] text-greym leading-snug">Control total y configuración</div>
+            </button>
+            <button type="button" data-rol="vendedor" class="login-rol-card rol-card">
+              <div class="rol-icono"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg></div>
+              <div class="font-bold text-sm text-dark333">Vendedor</div><div class="text-[11px] text-greym leading-snug">Toma pedidos (y factura si se le permite)</div>
+            </button>
+            <button type="button" data-rol="cajero" class="login-rol-card rol-card">
+              <div class="rol-icono"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg></div>
+              <div class="font-bold text-sm text-dark333">Cajero</div><div class="text-[11px] text-greym leading-snug">Recibe pedidos y factura</div>
+            </button>
+            <button type="button" data-rol="autoservicio" class="login-rol-card rol-card">
+              <div class="rol-icono"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div>
+              <div class="font-bold text-sm text-dark333">Autoservicio</div><div class="text-[11px] text-greym leading-snug">Caja de autoatención</div>
+            </button>
+          </div>
+
+          <!-- LOGIN -->
+          <form id="form-login" class="hidden flex-col gap-4" autocomplete="off">
+            <div class="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5">
+              <div class="flex items-center gap-2 text-sm"><span class="text-greym">Perfil:</span><span id="login-rol-badge" class="font-bold text-primary"></span></div>
+              <button type="button" id="btn-cambiar-perfil-login" class="text-xs text-primary font-semibold hover:underline">Cambiar</button>
+            </div>
+            <div><label class="text-xs font-semibold text-greym">Código de empresa</label>
+              <div class="campo-icono"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1"/></svg>
+                <input id="login-codigo-empresa" type="text" placeholder="FK-XXXXXX" required class="input-field uppercase font-mono tracking-wider"></div></div>
+            <div><label class="text-xs font-semibold text-greym">Usuario</label>
+              <div class="campo-icono"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <input id="login-usuario" type="text" required class="input-field" autocomplete="username"></div></div>
+            <div><div class="flex items-center justify-between"><label class="text-xs font-semibold text-greym">Contraseña</label>
+                <a href="#" id="link-olvide-password" class="text-xs text-primary font-semibold hover:underline">¿La olvidaste?</a></div>
+              <div class="campo-icono"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                <input id="login-password" type="password" required class="input-field !pr-10" autocomplete="current-password">
+                <button type="button" class="ojo" data-ojo="login-password" title="Mostrar/ocultar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button></div></div>
+            <button type="submit" class="mt-1 bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl transition active:scale-[0.98] flex items-center justify-center gap-2">Entrar
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m0 0l-6-6m6 6l-6 6"/></svg></button>
+          </form>
+
+          <!-- RECUPERAR CONTRASEÑA (paso propio, fuera del formulario de login) -->
+          <div id="reset-panel" class="hidden flex-col gap-3">
+            <div class="bg-primary/5 rounded-xl px-4 py-3 text-xs text-greym leading-relaxed">Necesitas la <b>contraseña maestra</b> que se definió al crear la empresa.</div>
+            <input id="reset-codigo-empresa" type="text" placeholder="Código de empresa (FK-XXXXXX)" class="input-field uppercase font-mono">
+            <input id="reset-usuario" type="text" placeholder="Usuario a restablecer" class="input-field">
+            <input id="reset-nueva-password" type="password" placeholder="Nueva contraseña" class="input-field">
+            <input id="reset-password-maestra" type="password" placeholder="Contraseña maestra de la empresa" class="input-field">
+            <button type="button" id="btn-reset" class="mt-1 bg-dark333 hover:bg-dark333/90 text-white font-bold py-3 rounded-xl transition active:scale-[0.98]">Restablecer contraseña</button>
+          </div>
+
+          <!-- SELECCIÓN LIBRE DE FUNCIONES -->
+          <div id="categoria-selector" class="hidden flex-col gap-4">
+            <p class="text-xs text-greym -mt-1">
+              Marca las funciones que quieres usar. No es obligatorio elegir ninguna ahora — puedes activarlas o
+              desactivarlas después, en cualquier momento, desde Ajustes.
+            </p>
+            <div id="categoria-grid" class="flex flex-col gap-5"></div>
+            <button type="button" id="btn-categoria-continuar"
+              class="bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl transition active:scale-[0.98] flex items-center justify-center gap-2">Continuar
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m0 0l-6-6m6 6l-6 6"/></svg></button>
+          </div>
+
+          <!-- CREAR CUENTA DE EMPRESA -->
+          <form id="form-registro" class="hidden flex-col gap-4" autocomplete="off">
+            <div class="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5">
+              <div class="flex items-center gap-2 text-sm min-w-0"><span class="text-greym shrink-0">Funciones:</span><span id="reg-categoria-badge" class="font-bold text-primary truncate"></span></div>
+              <button type="button" id="btn-cambiar-categoria" class="text-xs text-primary font-semibold hover:underline shrink-0">Cambiar</button>
+            </div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-greym">Datos de la empresa</div>
+            <label class="logo-drop" for="reg-logo">
+              <div class="preview" id="reg-logo-preview"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
+              <div><div class="text-sm font-semibold text-dark333">Logo de la empresa <span class="text-greym font-normal">(opcional)</span></div><div class="text-[11px] text-greym">Haz clic para elegir una imagen. Se muestra en la barra superior.</div></div>
+              <input id="reg-logo" type="file" accept="image/*" class="hidden">
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+              <div class="sm:col-span-3"><label class="text-xs font-semibold text-greym">Nombre comercial *</label><input id="reg-empresa" type="text" required class="input-field"></div>
+              <div class="sm:col-span-2"><label class="text-xs font-semibold text-greym">RIF</label><input id="reg-rif" type="text" class="input-field" placeholder="J-12345678-9"></div>
+              <div class="sm:col-span-5"><label class="text-xs font-semibold text-greym">Teléfono</label><input id="reg-telefono" type="tel" class="input-field" placeholder="0412-1234567"></div>
+            </div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-greym mt-1">Acceso del administrador</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div><label class="text-xs font-semibold text-greym">Usuario *</label><input id="reg-usuario" type="text" required class="input-field" placeholder="ej. admin"></div>
+              <div><label class="text-xs font-semibold text-greym">Contraseña *</label>
+                <div class="campo-icono"><input id="reg-password" type="password" required class="input-field !pl-3 !pr-10"><button type="button" class="ojo" data-ojo="reg-password" title="Mostrar/ocultar"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button></div>
+                <div class="fuerza"><div id="reg-fuerza"></div></div></div>
+            </div>
+            <div><label class="text-xs font-semibold text-greym">Contraseña maestra *</label><input id="reg-password-maestra" type="password" required class="input-field">
+              <p class="text-[11px] text-greym mt-1">Sirve para restablecer contraseñas de cualquier usuario. Guárdala en un lugar seguro.</p></div>
+            <button type="submit" class="mt-1 bg-teal hover:bg-teal/90 text-white font-bold py-3 rounded-xl transition active:scale-[0.98]">Crear cuenta de empresa</button>
+          </form>
+        </div>
+        <p class="text-center text-[11px] text-greym mt-5">Tus datos se guardan de forma local en este equipo.</p>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============ APP SHELL (interfaz principal, tras iniciar sesión) ============ -->
+<!-- ============ APERTURA DE CAJA (bloqueante, se muestra tras iniciar sesión si no hay caja abierta) ============ -->
+<div id="caja-screen" class="hidden fixed inset-0 z-[95] flex items-center justify-center fk-fondo p-4">
+  <div class="w-full max-w-sm auth-card p-8 animate-slideUp text-center">
+    <div class="flex justify-start -mt-2 mb-3"><button type="button" id="btn-caja-salir" class="btn-atras"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m0 0l6-6m-6 6l6 6"/></svg>Cerrar sesión</button></div>
+    <div class="w-12 h-12 rounded-xl bg-teal/10 text-teal flex items-center justify-center mx-auto mb-3 text-2xl">💵</div>
+
+    <!-- Admin / Vendedor: formulario para abrir caja -->
+    <div id="caja-apertura-form-wrap">
+      <h2 class="text-base font-bold text-dark333 mb-1">Apertura de Caja</h2>
+      <p class="text-xs text-greym mb-5">Ingresa la tasa del dólar del día. Los precios se mostrarán en Bolívares y Dólares simultáneamente.</p>
+      <form id="form-apertura-caja" class="flex flex-col gap-3 text-left">
+        <div>
+          <label class="text-xs font-semibold text-greym">Tasa del dólar de hoy (Bs por 1 USD) *</label>
+          <input id="caja-tasa" type="number" step="0.01" min="0.01" required placeholder="Ej. 55.30" class="input-field">
+        </div>
+        <button type="submit" class="mt-2 bg-teal hover:bg-teal/90 text-white font-bold py-2.5 rounded-xl transition active:scale-95">
+          Abrir Caja y Entrar
+        </button>
+      </form>
+    </div>
+
+    <!-- Autoservicio: solo puede esperar a que Admin/Vendedor abra la caja -->
+    <div id="caja-espera-wrap" class="hidden">
+      <h2 class="text-base font-bold text-dark333 mb-1">Caja aún no abierta</h2>
+      <p class="text-xs text-greym mb-5">Un Administrador o Vendedor debe abrir la caja con la tasa del dólar del día antes de poder facturar.</p>
+      <button id="btn-caja-reintentar" class="bg-primary/10 text-primary font-semibold text-sm py-2.5 px-5 rounded-xl hover:bg-primary/20 transition">
+        Ya se abrió, reintentar
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="app-shell" class="hidden flex flex-col h-screen">
+
+  <!-- Barra superior fija con el logo de la empresa, centrado -->
+  <div class="w-full bg-white border-b border-gray-200 flex items-center justify-center py-2 shrink-0 relative">
+    <img id="app-logo-img" class="h-9 object-contain hidden" alt="Logo de la empresa">
+    <div id="app-empresa-nombre" class="hidden font-extrabold text-primary text-base"></div>
+    <button id="btn-tasa-badge" class="absolute left-4 text-xs bg-primary/10 text-primary font-semibold px-3 py-1.5 rounded-full hover:bg-primary/20 transition hidden">
+      💵 Tasa: <span id="tasa-badge-valor">-</span>
+    </button>
+    <button id="btn-logout" class="absolute right-4 text-xs text-greym hover:text-accent font-semibold transition">Cerrar sesión</button>
+  </div>
+
+  <div class="flex flex-1 overflow-hidden">
+  <!-- SIDEBAR -->
+  <aside class="w-20 md:w-56 bg-primary text-white flex flex-col shrink-0 transition-all">
+    <div class="flex items-center gap-2 px-4 py-5 border-b border-white/10">
+      <div class="w-9 h-9 rounded-lg bg-teal flex items-center justify-center font-extrabold text-primary shrink-0">K</div>
+      <div class="hidden md:block leading-tight">
+        <div class="font-extrabold text-lg tracking-tight">FacturaK</div>
+        <div class="text-[10px] text-white/70 uppercase tracking-wide">Inventario y Facturación</div>
+      </div>
+    </div>
+    <nav class="flex-1 py-4 flex flex-col gap-1 px-2 overflow-y-auto">
+      <button data-tab="pos" class="nav-btn active-nav flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        <span class="hidden md:inline font-medium">Ventas (POS)</span>
+      </button>
+      <button data-tab="pedidos" id="nav-pedidos" class="nav-btn hidden flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200">
+        <span class="fk-ic"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg><span id="badge-pedidos" class="fk-badge">0</span></span>
+        <span class="hidden md:inline font-medium">Pedidos</span>
+      </button>
+      <button data-tab="mesas" id="nav-mesas" class="nav-btn hidden flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 10a2 2 0 012-2h14a2 2 0 012 2m-18 0v8a2 2 0 002 2h14a2 2 0 002-2v-8M7 20v2m10-2v2"/></svg>
+        <span class="hidden md:inline font-medium">Mesas</span>
+      </button>
+      <button data-tab="estaciones" id="nav-estaciones" class="nav-btn hidden flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        <span class="hidden md:inline font-medium">Estaciones</span>
+      </button>
+      <button data-tab="inventario" id="nav-inventario" class="nav-btn flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+        <span class="hidden md:inline font-medium">Inventario</span>
+      </button>
+      <button data-tab="clientes" id="nav-clientes" class="nav-btn flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4zm6 0a4 4 0 10-4-4"/></svg>
+        <span class="hidden md:inline font-medium">Clientes</span>
+      </button>
+      <button data-tab="reportes" id="nav-reportes" class="nav-btn flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V9m4 8V5m4 12v-6M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        <span class="hidden md:inline font-medium">Reportes</span>
+      </button>
+      <button data-tab="usuarios" id="nav-usuarios" class="nav-btn hidden flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        <span class="hidden md:inline font-medium">Usuarios</span>
+      </button>
+      <button data-tab="promociones" id="nav-promociones" class="nav-btn hidden flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5.586a1 1 0 01.707.293l7.414 7.414a1 1 0 010 1.414l-7.586 7.586a1 1 0 01-1.414 0L4.293 12.293A1 1 0 014 11.586V6a3 3 0 013-3z"/></svg>
+        <span class="hidden md:inline font-medium">Promociones</span>
+      </button>
+      <button data-tab="fiscal" id="nav-fiscal" class="nav-btn hidden flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <span class="hidden md:inline font-medium">Fiscal</span>
+      </button>
+      <button data-tab="creditos" id="nav-creditos" class="nav-btn hidden flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+        <span class="hidden md:inline font-medium">Créditos</span>
+      </button>
+      <button data-tab="impresoras" id="nav-impresoras" class="nav-btn hidden flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9V4a1 1 0 011-1h10a1 1 0 011 1v5M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-8 0h8m-8 0v3h8v-3"/></svg>
+        <span class="hidden md:inline font-medium">Impresoras</span>
+      </button>
+      <button data-tab="sync" id="nav-sync" class="nav-btn hidden flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        <span class="hidden md:inline font-medium">Sincronización</span>
+      </button>
+      <button data-tab="red" id="nav-red" class="nav-btn hidden flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v1a3 3 0 003 3h0a3 3 0 003-3v-1M12 3v9m0 0l-3-3m3 3l3-3M5 12a7 7 0 0014 0"/></svg>
+        <span class="hidden md:inline font-medium">Red y dispositivos</span>
+      </button>
+      <button data-tab="mensajes" id="nav-mensajes" class="nav-btn hidden flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-4 4v-4z"/></svg>
+        <span class="hidden md:inline font-medium">Mensajes</span>
+      </button>
+      <button data-tab="api" id="nav-api" class="nav-btn hidden flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16M6 9l-4 3 4 3m12-6l4 3-4 3"/></svg>
+        <span class="hidden md:inline font-medium">API</span>
+      </button>
+      <button data-tab="apariencia" id="nav-apariencia" class="nav-btn hidden flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+        <span class="hidden md:inline font-medium">Apariencia</span>
+      </button>
+    </nav>
+    <div id="sidebar-rol-badge" class="px-4 py-4 border-t border-white/10 text-[11px] text-white/60 hidden md:block"></div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1 overflow-y-auto">
+    <header class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+      <h1 id="page-title" class="text-xl font-bold text-dark333">Punto de Venta</h1>
+      <div id="toast-zone" class="flex flex-col gap-2 items-end"></div>
+    </header>
+
+    <div class="p-6">
+      <!-- ============ TAB: POS / VENTAS ============ -->
+      <section id="tab-pos" class="tab-panel animate-fadeIn grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <!-- Columna: productos -->
+        <div class="xl:col-span-2 flex flex-col gap-4">
+          <!-- Solo Autoservicio: registro del comprador antes de facturar -->
+          <div id="autoservicio-registro" class="hidden bg-white rounded-2xl shadow-sm p-4 border-2 border-teal/40">
+            <div class="text-sm font-bold text-dark333 mb-2">🛒 Bienvenido — Regístrate como comprador</div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <input id="auto-nombre" type="text" placeholder="Tu nombre *" class="input-field sm:col-span-1">
+              <input id="auto-cedula" type="text" placeholder="Cédula (opcional)" class="input-field sm:col-span-1">
+              <button id="btn-auto-registrar" class="bg-teal hover:bg-teal/90 text-white font-bold py-2 rounded-xl transition active:scale-95 sm:col-span-1">Comenzar compra</button>
+            </div>
+          </div>
+          <div id="autoservicio-activo" class="hidden bg-teal/10 border border-teal/30 rounded-2xl p-3 flex items-center justify-between">
+            <div class="text-sm"><span class="text-greym">Comprando como:</span> <span id="auto-comprador-nombre" class="font-bold text-dark333"></span></div>
+            <button id="btn-auto-cambiar" class="text-xs text-primary font-semibold hover:underline">Cambiar comprador</button>
+          </div>
+
+          <div id="pos-buscador-panel" class="bg-white rounded-2xl shadow-sm p-4">
+            <div class="flex flex-col md:flex-row gap-3">
+              <div class="relative flex-1">
+                <input id="pos-search" type="text" placeholder="Buscar por nombre, código de barras o categoría..."
+                  class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary transition">
+                <svg class="w-5 h-5 text-greym absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
+              </div>
+              <div class="relative flex-1">
+                <input id="barcode-input" type="text" placeholder="🔦 Escanear código de barras y presionar Enter..."
+                  class="w-full pl-4 pr-4 py-2.5 rounded-xl border-2 border-teal/50 bg-teal/5 focus:outline-none focus:ring-2 focus:ring-teal transition font-medium">
+              </div>
+            </div>
+          </div>
+
+          <div id="pos-tipo-tabs" class="flex flex-wrap gap-2"></div>
+          <div id="pos-products-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+        </div>
+
+        <!-- Columna: factura en tiempo real -->
+        <div class="xl:col-span-1">
+          <div class="bg-white rounded-2xl shadow-sm p-5 sticky top-24 flex flex-col gap-4 animate-slideUp">
+            <div id="pos-cliente-panel">
+              <label class="text-xs font-semibold text-greym uppercase">Cliente</label>
+              <div class="relative mt-1">
+                <input id="cliente-search" type="text" placeholder="Buscar por nombre o cédula..."
+                  class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+                <div id="cliente-results" class="absolute z-30 w-full bg-white shadow-lg rounded-lg mt-1 hidden max-h-40 overflow-y-auto border border-gray-100"></div>
+              </div>
+              <div id="cliente-seleccionado" class="mt-2 hidden bg-primary/5 border border-primary/20 rounded-lg p-2 text-xs">
+                <div class="font-semibold text-primary" id="cs-nombre"></div>
+                <div class="text-greym" id="cs-detalle"></div>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-3">
+              <div class="text-xs font-semibold text-greym uppercase mb-2">Factura en tiempo real</div>
+              <div id="cart-items" class="flex flex-col gap-2 max-h-64 overflow-y-auto pr-1"></div>
+              <div id="cart-empty" class="text-sm text-greym text-center py-6">El carrito está vacío</div>
+            </div>
+
+            <!-- Código de promoción (Admin/Vendedor) -->
+            <div id="promo-panel" class="hidden border-t border-gray-100 pt-3">
+              <div id="promo-form" class="flex flex-col gap-2">
+                <label class="text-xs font-semibold text-greym uppercase">Código de promoción</label>
+                <div class="grid grid-cols-2 gap-2">
+                  <input id="promo-codigo" type="text" placeholder="Código" class="input-field !py-1.5 text-sm uppercase">
+                  <input id="promo-clave" type="password" placeholder="Clave de aprobación" class="input-field !py-1.5 text-sm">
+                </div>
+                <button id="btn-aplicar-promo" type="button" class="bg-primary/10 text-primary text-xs font-bold py-2 rounded-lg hover:bg-primary/20 transition">Aplicar descuento</button>
+              </div>
+              <div id="promo-aplicada" class="hidden bg-teal/10 border border-teal/30 rounded-lg p-2 flex items-center justify-between text-xs">
+                <span class="font-semibold text-teal" id="promo-aplicada-label"></span>
+                <button id="btn-quitar-promo" type="button" class="text-accent hover:underline font-semibold">Quitar</button>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-3 flex flex-col gap-1.5 text-sm">
+              <div class="flex justify-between text-greym"><span>Subtotal</span><span id="sum-subtotal">$0.00</span></div>
+              <div id="sum-descuento-row" class="flex justify-between text-teal hidden"><span>Descuento</span><span id="sum-descuento">-$0.00</span></div>
+              <div class="flex justify-between items-baseline text-lg font-extrabold text-teal pt-1 border-t border-gray-100 mt-1">
+                <span>TOTAL</span>
+                <span class="text-right">
+                  <span id="sum-total">$0.00</span>
+                  <span id="sum-total-bs" class="block text-xs font-semibold text-primary"></span>
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <label class="text-xs font-semibold text-greym">Método de pago *</label>
+              <select id="pos-metodo-pago" required class="input-field">
+                <option value="">Selecciona un método de pago...</option>
+                
+                <option value="efectivo_usd">Efectivo (USD)</option>
+                
+                <option value="efectivo_bs">Efectivo (Bs)</option>
+                
+                <option value="pago_movil">Pago Móvil</option>
+                
+                <option value="transferencia">Transferencia bancaria</option>
+                
+                <option value="punto_venta">Punto de venta (débito/crédito)</option>
+                
+                <option value="zelle">Zelle</option>
+                
+                <option value="binance">Binance / USDT</option>
+                
+              </select>
+            </div>
+
+            <label class="flex items-center gap-2 text-xs text-greym">
+              <input type="checkbox" id="chk-enviar-correo" checked class="rounded accent-teal">
+              Enviar factura por correo automáticamente
+            </label>
+            <label class="flex items-center gap-2 text-xs text-greym">
+              <input type="checkbox" id="chk-imprimir" checked class="rounded accent-primary">
+              Imprimir automáticamente al generar
+            </label>
+
+            <div id="pos-pedido-banner" class="hidden fk-aviso rounded-xl p-3 text-sm flex items-center justify-between gap-2"><span id="pos-pedido-banner-txt" class="font-semibold"></span><button type="button" id="btn-pedido-soltar" class="text-xs font-semibold text-accent shrink-0">Soltar</button></div>
+            <input id="pos-pedido-nota" type="text" maxlength="140" placeholder="Nota del pedido (opcional)" class="hidden input-field">
+            <button id="btn-enviar-pedido" type="button" class="hidden w-full bg-primary hover:bg-primary/90 active:scale-[0.98] text-white font-bold py-3 rounded-xl transition-all shadow-md disabled:opacity-40">📨 Enviar pedido a caja</button>
+            <button id="btn-generar-factura"
+              class="w-full bg-teal hover:bg-teal/90 active:scale-[0.98] text-white font-bold py-3 rounded-xl transition-all duration-150 shadow-md shadow-teal/20 disabled:opacity-40 disabled:cursor-not-allowed">
+              Generar Factura
+            </button>
+            <button id="btn-limpiar-carrito" class="w-full text-greym text-sm hover:text-accent transition">Vaciar carrito</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ TAB: PEDIDOS ============ -->
+      <section id="tab-pedidos" class="tab-panel hidden animate-fadeIn">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div id="pedidos-filtros" class="flex gap-2 flex-wrap"></div>
+          <input id="pedidos-buscar" type="text" placeholder="Buscar por N°, vendedor o cliente..." class="input-field sm:max-w-xs">
+        </div>
+        <div id="pedidos-lista" class="grid gap-3" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))"></div>
+      </section>
+
+      <!-- ============ TAB: INVENTARIO ============ -->
+      <section id="tab-inventario" class="tab-panel hidden animate-fadeIn">
+        <!-- Solo Restaurante: dos inventarios separados -->
+        <div id="inv-subtabs" class="flex flex-wrap gap-2 mb-4"></div>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
+          <div class="relative w-full md:w-96">
+            <input id="inv-search" type="text" placeholder="Buscar producto..."
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary">
+            <svg class="w-5 h-5 text-greym absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
+          </div>
+          <div class="flex gap-2">
+            <button id="btn-exportar-excel" class="bg-primary/10 text-primary hover:bg-primary/20 font-semibold px-4 py-2.5 rounded-xl transition-all active:scale-95" title="Descarga el inventario (según el filtro y la búsqueda actuales) en un archivo de Excel">
+              📤 Exportar a Excel
+            </button>
+            <button id="btn-importar-excel" class="hidden bg-teal/10 text-teal hover:bg-teal/20 font-semibold px-4 py-2.5 rounded-xl transition-all active:scale-95">
+              📥 Importar Excel
+            </button>
+            <button id="btn-nuevo-producto" class="bg-primary hover:bg-primary/90 text-white font-semibold px-5 py-2.5 rounded-xl transition-all active:scale-95">
+              + Agregar Producto
+            </button>
+          </div>
+        </div>
+        <div id="inventario-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+      </section>
+
+      <!-- ============ TAB: CLIENTES ============ -->
+      <section id="tab-clientes" class="tab-panel hidden animate-fadeIn">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
+          <div class="relative w-full md:w-96">
+            <input id="cli-search" type="text" placeholder="Buscar cliente por nombre o cédula..."
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary">
+            <svg class="w-5 h-5 text-greym absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
+          </div>
+          <button id="btn-nuevo-cliente" class="bg-primary hover:bg-primary/90 text-white font-semibold px-5 py-2.5 rounded-xl transition-all active:scale-95">
+            + Agregar Cliente
+          </button>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-greym uppercase text-xs">
+              <tr>
+                <th class="text-left px-5 py-3">Nombre</th>
+                <th class="text-left px-5 py-3">Cédula/RIF</th>
+                <th class="text-left px-5 py-3">Teléfono</th>
+                <th class="text-left px-5 py-3">Correo</th>
+                <th class="text-right px-5 py-3">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="clientes-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ TAB: REPORTES ============ -->
+      <section id="tab-reportes" class="tab-panel hidden animate-fadeIn">
+        <div class="bg-white rounded-2xl shadow-sm p-5 mb-5">
+          <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <h3 class="font-bold text-dark333">Valoración del inventario</h3>
+            <select id="val-tipo" class="input-field !w-auto !py-1 text-xs">
+              <option value="TODOS">Todos los tipos</option><option value="PRODUCTO_NORMAL">📦 Solo productos</option><option value="PLATO">🍔 Solo platos</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="valoracion-inventario"></div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm p-5 mb-5">
+          <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <h3 class="font-bold text-dark333">Ventas por tipo de ítem</h3>
+            <select id="ventas-tipo-periodo" class="input-field !w-auto !py-1 text-xs">
+              <option value="1">Hoy</option><option value="7">Últimos 7 días</option><option value="30" selected>Últimos 30 días</option><option value="0">Todo</option>
+            </select>
+          </div>
+          <div id="ventas-por-tipo" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm p-5 mb-5">
+          <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <h3 class="font-bold text-dark333">Gráfico de ventas</h3>
+            <div class="flex gap-1.5 bg-gray-100 rounded-lg p-1">
+              <button data-grafico="diario" class="grafico-tab-btn text-xs font-semibold px-3 py-1.5 rounded-md transition">Diario</button>
+              <button data-grafico="semanal" class="grafico-tab-btn text-xs font-semibold px-3 py-1.5 rounded-md transition">Semanal</button>
+              <button data-grafico="mensual" class="grafico-tab-btn text-xs font-semibold px-3 py-1.5 rounded-md transition">Mensual</button>
+            </div>
+          </div>
+          <div class="relative" style="height: 260px;">
+            <canvas id="grafico-ventas-canvas"></canvas>
+          </div>
+          <div id="grafico-vacio" class="hidden text-center text-sm text-greym py-10">Aún no hay ventas registradas en este período.</div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-greym uppercase text-xs">
+              <tr>
+                <th class="text-left px-5 py-3">#</th>
+                <th class="text-left px-5 py-3">Fecha</th>
+                <th class="text-left px-5 py-3">Cliente</th>
+                <th class="text-right px-5 py-3">Total</th>
+                <th class="text-center px-5 py-3">Correo</th>
+                <th class="text-right px-5 py-3">Factura</th>
+              </tr>
+            </thead>
+            <tbody id="ventas-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ TAB: MESAS (restaurante) — plano libre con arrastre ============ -->
+      <section id="tab-mesas" class="tab-panel hidden animate-fadeIn">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
+          <p class="text-sm text-greym" id="mesas-hint">Toca una mesa para abrir su cuenta. Cada mesa lleva su propio pedido y se factura por separado.</p>
+          <button id="btn-nueva-mesa" class="hidden bg-primary hover:bg-primary/90 text-white font-semibold px-5 py-2.5 rounded-xl transition-all active:scale-95 shrink-0">
+            + Agregar Mesa
+          </button>
+        </div>
+        <div id="mesas-plano" class="relative w-full bg-white rounded-2xl shadow-sm overflow-hidden" style="height: 560px; background-image: radial-gradient(circle, #E5E7EB 1px, transparent 1px); background-size: 24px 24px;">
+          <div id="mesas-plano-vacio" class="hidden absolute inset-0 flex items-center justify-center text-sm text-greym text-center px-6">
+            Aún no hay mesas en el plano.<br>Como Administrador, usa "+ Agregar Mesa" y luego arrástralas a su posición real.
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ TAB: ESTACIONES (ciber) ============ -->
+      <section id="tab-estaciones" class="tab-panel hidden animate-fadeIn">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
+          <p class="text-sm text-greym">Controla el tiempo de cada estación. Sonará una alarma cuando el tiempo se agote.</p>
+          <div class="flex gap-2 shrink-0">
+            <button id="btn-historial-ciber" class="bg-primary/10 text-primary font-semibold px-5 py-2.5 rounded-xl transition-all active:scale-95">
+              📋 Historial
+            </button>
+            <button id="btn-nueva-estacion" class="bg-primary hover:bg-primary/90 text-white font-semibold px-5 py-2.5 rounded-xl transition-all active:scale-95">
+              + Agregar Estación
+            </button>
+          </div>
+        </div>
+        <div id="estaciones-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"></div>
+      </section>
+
+      <!-- ============ TAB: USUARIOS (solo Admin) ============ -->
+      <section id="tab-usuarios" class="tab-panel hidden animate-fadeIn">
+        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-5">
+          <p class="text-sm text-greym max-w-md">Habilita o deshabilita los perfiles. <b>Vendedor</b>: toma pedidos y, si lo permites, también factura. <b>Cajero</b>: recibe los pedidos y los factura. El perfil Admin no se puede deshabilitar.</p>
+          <form id="form-nuevo-usuario" class="bg-white rounded-2xl shadow-sm p-4 flex flex-col sm:flex-row gap-2 items-stretch">
+            <input id="nu-usuario" type="text" placeholder="Nuevo usuario" required class="input-field">
+            <input id="nu-password" type="password" placeholder="Contraseña" required class="input-field">
+            <select id="nu-rol" class="input-field">
+              <option value="vendedor">Vendedor</option>
+              <option value="cajero">Cajero</option>
+              <option value="autoservicio">Autoservicio</option>
+            </select>
+            <select id="nu-factura" class="input-field" title="Solo para vendedores">
+              <option value="0">Vendedor: solo pedidos</option>
+              <option value="1">Vendedor: pedidos y factura</option>
+            </select>
+            <button type="submit" class="bg-primary hover:bg-primary/90 text-white font-semibold px-5 py-2 rounded-xl transition-all active:scale-95 whitespace-nowrap">+ Crear perfil</button>
+          </form>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-greym uppercase text-xs">
+              <tr>
+                <th class="text-left px-5 py-3">Usuario</th>
+                <th class="text-left px-5 py-3">Rol</th>
+                <th class="text-left px-5 py-3">Permiso</th>
+                <th class="text-center px-5 py-3">Estado</th>
+                <th class="text-right px-5 py-3">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="usuarios-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ TAB: PROMOCIONES (solo Admin) ============ -->
+      <section id="tab-promociones" class="tab-panel hidden animate-fadeIn">
+        <div class="bg-white rounded-2xl shadow-sm p-5 mb-5">
+          <div class="text-sm font-bold text-dark333 mb-3">Crear código de promoción</div>
+          <form id="form-nueva-promocion" class="grid grid-cols-1 sm:grid-cols-5 gap-2 items-end">
+            <div>
+              <label class="text-xs font-semibold text-greym">Código *</label>
+              <input id="np-codigo" type="text" required class="input-field uppercase" placeholder="VERANO10">
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-greym">Tipo *</label>
+              <select id="np-tipo" class="input-field">
+                <option value="porcentaje">% Porcentaje</option>
+                <option value="fijo">$ Valor fijo</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-greym">Valor *</label>
+              <input id="np-valor" type="number" step="0.01" min="0" required class="input-field">
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-greym">Clave de aprobación *</label>
+              <input id="np-clave" type="password" required class="input-field" placeholder="Mín. 4 caracteres">
+            </div>
+            <button type="submit" class="bg-primary hover:bg-primary/90 text-white font-semibold px-5 py-2.5 rounded-xl transition-all active:scale-95">+ Crear código</button>
+          </form>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-greym uppercase text-xs">
+              <tr>
+                <th class="text-left px-5 py-3">Código</th>
+                <th class="text-left px-5 py-3">Tipo</th>
+                <th class="text-left px-5 py-3">Valor</th>
+                <th class="text-center px-5 py-3">Estado</th>
+                <th class="text-right px-5 py-3">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="promociones-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ TAB: CONFIGURACIÓN FISCAL (ticket térmico 58mm) ============ -->
+      <section id="tab-fiscal" class="tab-panel hidden animate-fadeIn">
+        <div class="bg-primary/5 border border-primary/15 rounded-2xl p-4 mb-5 text-xs text-greym leading-relaxed">
+          Esta sección es <b>opcional</b>, pensada para negocios que ya emiten sus comprobantes
+          fiscales por otra vía (ej. un sistema homologado ante AFIP) y quieren además una
+          <b>impresión térmica compacta de 58mm</b> estilo ticket fiscal. FacturaK no se conecta al
+          servicio web de AFIP: el número de CAE se carga a mano por factura, una vez que ya lo
+          obtuviste por tu vía fiscal habitual. Activar esta opción sin cargar un CAE real
+          <b>no</b> convierte al ticket en un comprobante fiscalmente válido por sí solo — es solo
+          el formato de impresión.
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm p-5 mb-5">
+          <div class="flex items-center justify-between mb-4">
+            <div class="text-sm font-bold text-dark333">Datos fiscales del emisor</div>
+            <label class="flex items-center gap-2 text-xs text-greym cursor-pointer">
+              <input type="checkbox" id="fiscal-activo" class="rounded accent-teal">
+              Activar ticket térmico 58mm
+            </label>
+          </div>
+          <form id="form-fiscal" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-semibold text-greym">CUIT</label>
+              <input id="fiscal-cuit" type="text" class="input-field" placeholder="20-12345678-9">
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-greym">Ingresos Brutos</label>
+              <input id="fiscal-ingresos-brutos" type="text" class="input-field" placeholder="21-123456-7">
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-greym">Inicio de Actividades</label>
+              <input id="fiscal-inicio-actividades" type="text" class="input-field" placeholder="01/01/2010">
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-greym">Condición frente al IVA</label>
+              <select id="fiscal-condicion-iva" class="input-field">
+                <option value="Monotributo">Monotributo</option>
+                <option value="Responsable Inscripto">Responsable Inscripto</option>
+                <option value="Exento">Exento</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-greym">Punto de Venta</label>
+              <input id="fiscal-punto-venta" type="number" min="1" class="input-field" placeholder="3">
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-greym">Tipo de Comprobante</label>
+              <select id="fiscal-tipo-comprobante" class="input-field">
+                <option value="C">Factura C</option>
+                <option value="B">Factura B</option>
+                <option value="A">Factura A</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-greym">Alícuota de IVA a mostrar en el ticket (%)</label>
+              <input id="fiscal-iva-pct" type="number" step="0.01" min="0" max="100" class="input-field" placeholder="21.00">
+            </div>
+            <div class="sm:col-span-2">
+              <button type="submit" class="bg-primary hover:bg-primary/90 text-white font-semibold px-5 py-2.5 rounded-xl transition-all active:scale-95">Guardar configuración fiscal</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ============ TAB: CRÉDITOS (contenido generado por js/creditos.js) ============ -->
+      <section id="tab-creditos" class="tab-panel hidden animate-fadeIn">
+        <div id="cr-kpis" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5"></div>
+        <div class="mb-5"><div id="cr-subtabs" class="inline-flex flex-wrap gap-1.5 bg-gray-100 rounded-xl p-1"></div></div>
+        <div id="cr-vista"></div>
+      </section>
+
+      <!-- ============ TAB: APARIENCIA (editor de temas, js/tema.js) ============ -->
+      <section id="tab-apariencia" class="tab-panel hidden animate-fadeIn"></section>
+
+      <!-- ============ TAB: CONFIGURACIÓN DE IMPRESORAS ============ -->
+      <section id="tab-impresoras" class="tab-panel hidden animate-fadeIn">
+        <div class="bg-primary/5 border border-primary/15 rounded-2xl p-4 mb-5 text-xs text-greym leading-relaxed">
+          Las <b>comandas</b> se mandan siempre a la impresora de <b>Cocina</b>, y las <b>facturas/tickets</b>
+          siempre a la de <b>Caja</b> — el enrutado es automático. Si la impresión directa falla o está
+          desactivada, la app usa el diálogo de impresión del navegador como respaldo.
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div class="text-sm font-bold text-dark333">Impresión directa (ESC/POS)</div>
+            <label class="flex items-center gap-2 text-xs text-greym cursor-pointer">
+              <input type="checkbox" id="impresoras-activa" class="rounded accent-teal">
+              Activar impresión directa
+            </label>
+          </div>
+          <form id="form-impresoras" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs font-semibold text-greym">Impresora de Cocina (comandas)</label>
+              <select id="impresora-cocina" class="input-field"><option value="">Sin asignar</option></select>
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-greym">Impresora de Caja (facturas/tickets)</label>
+              <select id="impresora-caja" class="input-field"><option value="">Sin asignar</option></select>
+            </div>
+            <div class="sm:col-span-2 flex items-center gap-3">
+              <button type="submit" class="bg-primary hover:bg-primary/90 text-white font-semibold px-5 py-2.5 rounded-xl transition-all active:scale-95">Guardar configuración</button>
+              <button type="button" id="btn-recargar-impresoras" class="text-primary text-xs font-semibold hover:underline">↻ Volver a buscar impresoras</button>
+              <button type="button" id="btn-probar-impresora" class="text-primary text-xs font-semibold hover:underline">🖨️ Imprimir página de prueba</button>
+            </div>
+          </form>
+          <p id="impresoras-sin-detectar" class="hidden text-xs text-accent mt-3">No se detectó ninguna impresora instalada en este equipo. Instala el driver (ej. MPT2) y volvé a buscar.</p>
+        </div>
+
+        <!-- ===== Correo saliente (SMTP) ===== -->
+        <div class="bg-white rounded-2xl shadow-sm p-5 mt-5">
+          <div class="flex items-center justify-between mb-1 flex-wrap gap-2">
+            <div class="text-sm font-bold text-dark333">Correo saliente (envío automático de facturas)</div>
+            <label class="flex items-center gap-2 text-xs text-greym cursor-pointer">
+              <input type="checkbox" id="correo-activo" class="rounded accent-teal">
+              Activar envío por correo
+            </label>
+          </div>
+          <p class="text-[11px] text-greym mb-4 leading-relaxed">Con Gmail: activa la verificación en 2 pasos en tu cuenta de Google y crea una <b>contraseña de aplicación</b>; úsala aquí en lugar de tu contraseña normal. La factura se adjunta en PDF.</p>
+          <form id="form-correo" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="text-xs font-semibold text-greym">Servidor SMTP</label>
+              <input id="correo-host" type="text" class="input-field" placeholder="smtp.gmail.com">
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-greym">Seguridad</label>
+              <select id="correo-seguridad" class="input-field">
+                <option value="ssl">SSL (puerto 465)</option>
+                <option value="starttls">STARTTLS (puerto 587)</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-greym">Puerto</label>
+              <input id="correo-puerto" type="number" min="1" class="input-field" placeholder="465">
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-greym">Usuario (correo)</label>
+              <input id="correo-usuario" type="text" class="input-field" placeholder="minegocio@gmail.com" autocomplete="off">
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-greym">Contraseña / contraseña de aplicación</label>
+              <input id="correo-password" type="password" class="input-field" autocomplete="new-password">
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-greym">Remitente (opcional)</label>
+              <input id="correo-remitente" type="email" class="input-field" placeholder="Igual al usuario">
+            </div>
+            <div class="sm:col-span-3 flex items-center gap-3 flex-wrap">
+              <button type="submit" class="bg-primary hover:bg-primary/90 text-white font-semibold px-5 py-2.5 rounded-xl transition-all active:scale-95">Guardar correo</button>
+              <button type="button" id="btn-probar-correo" class="bg-primary/10 text-primary font-semibold px-5 py-2.5 rounded-xl hover:bg-primary/20 transition">Enviar correo de prueba</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-5">
+          <!-- ===== Datos de la empresa ===== -->
+          <div class="bg-white rounded-2xl shadow-sm p-5">
+            <div class="text-sm font-bold text-dark333 mb-1">Datos de la empresa</div>
+            <p class="text-[11px] text-greym mb-4">Código de empresa: <b id="emp-codigo" class="font-mono text-primary"></b> · Rubro: <b id="emp-rubro"></b></p>
+            <form id="form-empresa" class="flex flex-col gap-3">
+              <div>
+                <label class="text-xs font-semibold text-greym">Nombre *</label>
+                <input id="emp-nombre" type="text" required class="input-field">
+              </div>
+              <div>
+                <label class="text-xs font-semibold text-greym">RIF</label>
+                <input id="emp-rif" type="text" class="input-field">
+              </div>
+              <div>
+                <label class="text-xs font-semibold text-greym">Teléfono</label>
+                <input id="emp-telefono" type="tel" class="input-field" placeholder="0412-1234567">
+              </div>
+              <div>
+                <label class="text-xs font-semibold text-greym">Cambiar logo</label>
+                <input id="emp-logo" type="file" accept="image/*" class="input-field">
+              </div>
+              <div class="sm:col-span-2">
+                <label class="text-xs font-semibold text-greym">Tipo de negocio</label>
+                <select id="emp-categoria" class="input-field"></select>
+                <p class="text-[11px] text-greym mt-1">Define qué módulos aparecen sugeridos por defecto. Puedes ajustarlos a mano abajo en cualquier momento.</p>
+              </div>
+              <div class="sm:col-span-2">
+                <label class="text-xs font-semibold text-greym block mb-1.5">Módulos principales</label>
+                <div id="emp-modulos-lista" class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 mb-4"></div>
+                <label class="text-xs font-semibold text-greym block mb-1.5">Funciones especializadas</label>
+                <div id="emp-funciones-lista" class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2"></div>
+              </div>
+              <div class="flex items-center gap-3">
+                <button type="submit" class="bg-primary hover:bg-primary/90 text-white font-semibold px-5 py-2.5 rounded-xl transition-all active:scale-95">Guardar datos</button>
+                <button type="button" id="btn-quitar-logo" class="text-accent text-xs font-semibold hover:underline">Quitar logo</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- ===== Respaldo ===== -->
+          <div class="bg-white rounded-2xl shadow-sm p-5">
+            <div class="text-sm font-bold text-dark333 mb-1">Respaldo de datos</div>
+            <p class="text-[11px] text-greym mb-4 leading-relaxed">Todos los datos se guardan en este equipo y FacturaK hace además una copia automática cada día (se conservan las últimas 30). Exporta un respaldo de vez en cuando y guárdalo en un pendrive o en la nube.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button type="button" id="btn-exportar-datos" class="bg-teal hover:bg-teal/90 text-white font-semibold px-4 py-2.5 rounded-xl transition active:scale-95 text-sm">⬇️ Exportar respaldo</button>
+              <button type="button" id="btn-importar-datos" class="bg-primary/10 text-primary font-semibold px-4 py-2.5 rounded-xl hover:bg-primary/20 transition text-sm">⬆️ Restaurar respaldo</button>
+              <button type="button" id="btn-abrir-carpeta-facturas" class="bg-gray-100 text-dark333 font-semibold px-4 py-2.5 rounded-xl hover:bg-gray-200 transition text-sm">📂 Carpeta de facturas PDF</button>
+              <button type="button" id="btn-abrir-carpeta-datos" class="bg-gray-100 text-dark333 font-semibold px-4 py-2.5 rounded-xl hover:bg-gray-200 transition text-sm">🗄️ Carpeta de datos</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ TAB: SINCRONIZACIÓN EN LA NUBE (contenido generado por js/nube-ui.js) ============ -->
+      <section id="tab-sync" class="tab-panel hidden animate-fadeIn"></section>
+      <section id="tab-red" class="tab-panel hidden animate-fadeIn"></section>
+
+      <!-- ============ TAB: MENSAJES DE WHATSAPP (contenido generado por js/mensajes-ui.js) ============ -->
+      <section id="tab-mensajes" class="tab-panel hidden animate-fadeIn"></section>
+
+      <!-- ============ TAB: API E INTEGRACIONES (contenido generado por js/api-ui.js) ============ -->
+      <section id="tab-api" class="tab-panel hidden animate-fadeIn"></section>
+    </div>
+  </main>
+  </div>
+</div>
+
+<!-- ============ MODAL: IMPORTAR INVENTARIO DESDE EXCEL ============ -->
+<div id="modal-importar" class="modal-overlay hidden">
+  <div class="modal-card animate-slideUp !max-w-4xl">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-lg font-bold text-dark333">Importar inventario desde Excel</h3>
+      <button class="modal-close text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+
+    <!-- Paso 1: archivo -->
+    <div id="imp-paso-archivo">
+      <div id="imp-drop-archivo" class="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center cursor-pointer hover:border-primary transition">
+        <div class="text-3xl mb-1">📄</div>
+        <div class="text-sm font-semibold text-dark333">Arrastra aquí tu archivo o haz clic para elegirlo</div>
+        <div class="text-xs text-greym mt-1">.xlsx, .xls o .csv — la primera fila debe tener los encabezados</div>
+        <input id="imp-archivo" type="file" accept=".xlsx,.xls,.csv" class="hidden">
+      </div>
+      <div class="mt-3 text-xs text-greym leading-relaxed">
+        Columnas que se reconocen: <b>Código/SKU</b>, <b>Nombre/Descripción</b>, <b>Precio de Venta</b>, <b>Costo</b>,
+        <b>Stock/Cantidad Inicial</b>, <b>Categoría</b> y <b>URL de Imagen</b> (opcional; debe ser un enlace directo a la foto).
+        <button type="button" id="imp-plantilla" class="text-primary font-semibold hover:underline ml-1">Descargar plantilla de ejemplo</button>
+      </div>
+    </div>
+
+    <!-- Paso 2: revisión -->
+    <div id="imp-paso-revision" class="hidden space-y-4">
+      <div class="flex items-center justify-between text-xs text-greym">
+        <span id="imp-nombre-archivo" class="font-semibold text-dark333 truncate"></span>
+        <button type="button" id="imp-cambiar" class="text-primary font-semibold hover:underline shrink-0">Elegir otro archivo</button>
+      </div>
+
+      <div>
+        <div class="text-xs font-semibold text-greym mb-1.5">Columnas detectadas (corrige si alguna quedó mal)</div>
+        <div id="imp-mapa" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+        <label class="flex items-center gap-2 text-dark333 cursor-pointer"><input type="checkbox" id="imp-actualizar" checked class="rounded accent-teal"> Actualizar productos que ya existen (mismo código)</label>
+        <label id="imp-tipo-wrap" class="flex items-center gap-2 text-dark333">Tipo de ítem
+          <select id="imp-tipo" class="input-field !py-1 !w-auto"><option value="PRODUCTO_NORMAL">📦 Producto</option><option value="PLATO">🍔 Plato / Menú</option><option value="SERVICIO">✂️ Servicio</option></select>
+          <span class="text-[11px] text-greym">(si el archivo no trae una columna "Tipo")</span>
+        </label>
+      </div>
+
+      <div>
+        <div class="text-xs font-semibold text-greym mb-1.5">Fotos (opcional): arrastra imágenes cuyo nombre de archivo sea el código del producto, por ejemplo <span class="font-mono">A001.jpg</span></div>
+        <div id="imp-drop-fotos" class="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center text-xs text-greym cursor-pointer hover:border-primary transition">
+          Arrastra las fotos aquí o haz clic para elegirlas
+          <input id="imp-fotos" type="file" accept="image/*" multiple class="hidden">
+        </div>
+        <div id="imp-fotos-resumen" class="text-xs text-greym mt-1"></div>
+      </div>
+
+      <div id="imp-resumen" class="flex flex-wrap gap-2 text-xs font-semibold"></div>
+      <div class="overflow-auto max-h-64 border border-gray-100 rounded-xl">
+        <table class="w-full text-xs"><thead class="bg-gray-50 text-greym sticky top-0"><tr>
+          <th class="text-left p-2 font-semibold">Fila</th><th class="text-left p-2 font-semibold">Estado</th><th class="text-left p-2 font-semibold">Código</th>
+          <th class="text-left p-2 font-semibold">Nombre</th><th class="text-right p-2 font-semibold">Precio</th><th class="text-right p-2 font-semibold">Costo</th>
+          <th class="text-right p-2 font-semibold">Stock</th><th class="text-left p-2 font-semibold">Foto</th></tr></thead>
+          <tbody id="imp-tabla"></tbody></table>
+      </div>
+
+      <div id="imp-progreso" class="hidden">
+        <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div id="imp-barra" class="h-full bg-teal transition-all" style="width:0%"></div></div>
+        <div id="imp-progreso-texto" class="text-xs text-greym mt-1"></div>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button type="button" class="modal-close px-4 py-2.5 rounded-xl text-sm font-semibold text-greym hover:bg-gray-100 transition">Cancelar</button>
+        <button type="button" id="imp-confirmar" class="px-5 py-2.5 rounded-xl text-sm font-bold bg-teal hover:bg-teal/90 text-white transition active:scale-95 disabled:opacity-40">Importar</button>
+      </div>
+    </div>
+
+    <!-- Paso 3: resultado -->
+    <div id="imp-paso-resultado" class="hidden space-y-3">
+      <div id="imp-resultado-resumen" class="text-sm text-dark333"></div>
+      <div id="imp-resultado-detalle" class="text-xs text-greym max-h-48 overflow-auto space-y-0.5"></div>
+      <div class="flex justify-end"><button type="button" class="modal-close px-5 py-2.5 rounded-xl text-sm font-bold bg-primary text-white">Listo</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-producto" class="modal-overlay hidden">
+  <div class="modal-card animate-slideUp">
+    <div class="flex items-center justify-between mb-4">
+      <h3 id="modal-producto-title" class="text-lg font-bold text-dark333">Nuevo Producto</h3>
+      <button class="modal-close text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+    <form id="form-producto" class="flex flex-col gap-3">
+      <input type="hidden" id="p-id">
+      <input type="hidden" id="p-tipo-item" value="PRODUCTO_NORMAL">
+
+      <!-- Tipo de ítem -->
+      <div>
+        <label class="text-xs font-semibold text-greym">Tipo de ítem</label>
+        <div class="grid grid-cols-3 gap-2 mt-1">
+          <button type="button" data-tipo="PLATO" class="p-tipo-btn rounded-xl border-2 border-gray-200 py-2 text-xs font-semibold text-dark333 transition">🍔<br>Plato / Menú</button>
+          <button type="button" data-tipo="PRODUCTO_NORMAL" class="p-tipo-btn rounded-xl border-2 border-gray-200 py-2 text-xs font-semibold text-dark333 transition">📦<br>Producto</button>
+          <button type="button" data-tipo="SERVICIO" class="p-tipo-btn rounded-xl border-2 border-gray-200 py-2 text-xs font-semibold text-dark333 transition">✂️<br>Servicio</button>
+        </div>
+        <p id="p-tipo-ayuda" class="text-[11px] text-greym mt-1"></p>
+      </div>
+
+      <div id="p-codigo-wrap">
+        <label class="text-xs font-semibold text-greym">Código de barras / SKU</label>
+        <input id="p-codigo" type="text" class="input-field">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-greym" id="p-nombre-label">Nombre *</label>
+        <input id="p-nombre" type="text" required class="input-field">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-greym">Descripción</label>
+        <textarea id="p-descripcion" rows="2" class="input-field"></textarea>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-greym" id="p-precio-label">Precio de Venta *</label>
+          <input id="p-precio" type="number" step="0.01" min="0" required class="input-field">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-greym">Impuesto (%)</label>
+          <input id="p-impuesto" type="number" step="0.01" min="0" max="100" class="input-field" placeholder="Vacío = el general">
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-greym">Categoría</label>
+        <input id="p-categoria" type="text" list="dl-categorias" class="input-field" placeholder="Ej. Bebidas, Cortes, Electricidad…">
+        <datalist id="dl-categorias"></datalist>
+      </div>
+
+      <!-- Solo Admin: costo (todos) y precio al mayor (productos) -->
+      <div id="p-precios-admin-wrap" class="hidden grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-greym">Costo</label>
+          <input id="p-precio-costo" type="number" step="0.01" min="0" class="input-field">
+        </div>
+        <div id="p-mayor-wrap">
+          <label class="text-xs font-semibold text-greym">Precio al Mayor</label>
+          <input id="p-precio-mayor" type="number" step="0.01" min="0" class="input-field">
+        </div>
+      </div>
+
+      <!-- PLATO -->
+      <div id="p-bloque-plato" class="hidden flex flex-col gap-3 bg-amber-50/60 rounded-xl p-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div id="p-categoria-producto-wrap">
+            <label class="text-xs font-semibold text-greym">Categoría gastronómica</label>
+            <select id="p-categoria-producto" class="input-field">
+              <option value="entrada">Entrada</option>
+              <option value="plato">Plato fuerte</option>
+              <option value="bebida">Bebida</option>
+              <option value="adicional">Adicional</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-greym">Tiempo de preparación (min)</label>
+            <input id="p-tiempo-prep" type="number" min="0" step="1" class="input-field" placeholder="Ej. 15">
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-greym">Estado</label>
+          <select id="p-estado" class="input-field"><option value="disponible">Disponible</option><option value="agotado">Agotado</option></select>
+        </div>
+        <div id="p-receta-wrap">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-semibold text-greym">Receta (opcional)</label>
+            <button type="button" id="btn-add-ingrediente" class="text-xs text-primary font-semibold hover:underline">+ Ingrediente</button>
+          </div>
+          <div id="p-receta-lista" class="flex flex-col gap-2 mt-1"></div>
+          <p class="text-[11px] text-greym mt-1">Al vender el plato se descuenta del stock cada ingrediente indicado. Sin receta, el plato se vende directo sin descontar insumos.</p>
+        </div>
+      </div>
+
+      <!-- SERVICIO -->
+      <div id="p-bloque-servicio" class="hidden flex flex-col gap-3 bg-sky-50/60 rounded-xl p-3">
+        <label class="flex items-center gap-2 text-sm text-dark333 cursor-pointer"><input type="checkbox" id="p-precio-variable" class="rounded accent-teal"> Permitir precio variable en el POS (presupuestos personalizados)</label>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-semibold text-greym">Duración estimada (min)</label>
+            <input id="p-duracion" type="number" min="0" step="1" class="input-field" placeholder="Ej. 30">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-greym">Empleado / técnico (opcional)</label>
+            <input id="p-empleado" type="text" list="dl-empleados" class="input-field">
+            <datalist id="dl-empleados"></datalist>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCTO y PLATO: control de stock -->
+      <div id="p-bloque-stock" class="flex flex-col gap-3">
+        <label class="flex items-center gap-2 text-sm text-dark333 cursor-pointer"><input type="checkbox" id="p-controla-stock" class="rounded accent-teal"> Controlar stock de este ítem (se descuenta en cada venta)</label>
+        <div id="p-stock-campos" class="grid grid-cols-2 gap-3">
+          <div id="p-stock-wrap">
+            <label class="text-xs font-semibold text-greym">Stock actual *</label>
+            <input id="p-stock" type="number" step="0.001" min="0" class="input-field">
+          </div>
+          <div id="p-stock-minimo-wrap">
+            <label class="text-xs font-semibold text-greym">Stock mínimo (alerta)</label>
+            <input id="p-stock-minimo" type="number" min="0" step="1" class="input-field" placeholder="0 = sin alerta">
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCTO: peso, variantes y visibilidad -->
+      <div id="p-bloque-producto" class="flex flex-col gap-3">
+        <div id="p-tipo-venta-wrap" class="hidden">
+          <label class="text-xs font-semibold text-greym">Tipo de venta</label>
+          <select id="p-tipo-venta" class="input-field">
+            <option value="unidad">Por unidad</option>
+            <option value="peso">Por peso (kg)</option>
+          </select>
+          <p class="text-[11px] text-greym mt-1">Si es "por peso", el precio ingresado arriba se toma como precio por kilogramo.</p>
+        </div>
+        <div id="p-variantes-wrap" class="hidden">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-semibold text-greym">Modelos y tallas</label>
+            <button type="button" id="btn-add-variante" class="text-xs text-primary font-semibold hover:underline">+ Agregar</button>
+          </div>
+          <div id="p-variantes-lista" class="flex flex-col gap-2 mt-1"></div>
+          <p class="text-[11px] text-greym mt-1">El stock total del producto se calcula sumando el stock de cada modelo/talla.</p>
+        </div>
+        <label class="flex items-center gap-2 text-sm text-dark333 cursor-pointer"><input type="checkbox" id="p-venta-pos" class="rounded accent-teal" checked> Mostrar en el punto de venta <span class="text-[11px] text-greym">(desmárcalo para insumos que solo usas en recetas)</span></label>
+      </div>
+
+      <div>
+        <label class="text-xs font-semibold text-greym">Foto</label>
+        <input id="p-imagen" type="file" accept="image/*" class="input-field">
+      </div>
+      <button type="submit" class="mt-2 bg-teal hover:bg-teal/90 text-white font-bold py-2.5 rounded-xl transition active:scale-95">
+        Guardar
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ MODAL: CUENTA DE MESA (restaurante) ============ -->
+<div id="modal-cuenta-mesa" class="modal-overlay hidden">
+  <div class="modal-card animate-slideUp !max-w-lg">
+    <div class="flex items-center justify-between mb-4">
+      <h3 id="cuenta-mesa-title" class="text-lg font-bold text-dark333">Mesa</h3>
+      <button class="modal-close text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+    <div class="relative mb-3">
+      <input id="cm-search" type="text" placeholder="Buscar plato o bebida..."
+        class="w-full pl-4 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+    </div>
+    <div id="cm-products-grid" class="grid grid-cols-3 gap-2 max-h-52 overflow-y-auto mb-3 pr-1"></div>
+    <div class="border-t border-gray-100 pt-3">
+      <div class="text-xs font-semibold text-greym uppercase mb-2">Pedido de la mesa</div>
+      <div id="cm-items" class="flex flex-col gap-2 max-h-44 overflow-y-auto pr-1"></div>
+      <div id="cm-empty" class="text-sm text-greym text-center py-4">Aún no hay ítems en el pedido</div>
+    </div>
+    <div class="border-t border-gray-100 pt-3 flex flex-col gap-1.5 text-sm">
+      <div class="flex justify-between text-greym"><span>Subtotal</span><span id="cm-subtotal">$0.00</span></div>
+      <div class="flex justify-between items-baseline text-lg font-extrabold text-teal pt-1 border-t border-gray-100 mt-1">
+        <span>TOTAL</span>
+        <span class="text-right">
+          <span id="cm-total">$0.00</span>
+          <span id="cm-total-bs" class="block text-xs font-semibold text-primary"></span>
+        </span>
+      </div>
+    </div>
+    <div class="relative mt-2">
+      <input id="cm-cliente-search" type="text" placeholder="Cliente (opcional) - nombre o cédula..."
+        class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+      <div id="cm-cliente-results" class="absolute z-30 w-full bg-white shadow-lg rounded-lg mt-1 hidden max-h-32 overflow-y-auto border border-gray-100"></div>
+    </div>
+    <div class="mt-2">
+      <label class="text-xs font-semibold text-greym">Método de pago (para cerrar la mesa) *</label>
+      <select id="cm-metodo-pago" class="input-field">
+        <option value="">Selecciona un método de pago...</option>
+        
+        <option value="efectivo_usd">Efectivo (USD)</option>
+        
+        <option value="efectivo_bs">Efectivo (Bs)</option>
+        
+        <option value="pago_movil">Pago Móvil</option>
+        
+        <option value="transferencia">Transferencia bancaria</option>
+        
+        <option value="punto_venta">Punto de venta (débito/crédito)</option>
+        
+        <option value="zelle">Zelle</option>
+        
+        <option value="binance">Binance / USDT</option>
+        
+      </select>
+    </div>
+    <div class="flex gap-2 mt-3">
+      <button id="btn-ordenar" class="flex-1 bg-primary/10 text-primary font-bold py-2.5 rounded-xl transition active:scale-95 hover:bg-primary/20">
+        🖨️ Ordenar
+      </button>
+      <button id="btn-cerrar-cuenta" class="flex-1 bg-teal hover:bg-teal/90 text-white font-bold py-2.5 rounded-xl transition active:scale-95">
+        Cerrar Mesa y Facturar
+      </button>
+    </div>
+    <p class="text-[11px] text-greym text-center mt-2">"Ordenar" guarda el pedido y envía la comanda a imprimir para cocina. "Cerrar Mesa" genera la factura con el método de pago elegido.</p>
+  </div>
+</div>
+
+<!-- ============ MODAL: NUEVA MESA ============ -->
+<div id="modal-nueva-mesa" class="modal-overlay hidden">
+  <div class="modal-card animate-slideUp">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold text-dark333">Nueva Mesa</h3>
+      <button class="modal-close text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+    <form id="form-nueva-mesa" class="flex flex-col gap-3">
+      <div>
+        <label class="text-xs font-semibold text-greym">Número de mesa *</label>
+        <input id="nm-numero" type="number" min="1" required class="input-field">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-greym">Nombre (opcional)</label>
+        <input id="nm-nombre" type="text" placeholder="Ej. Terraza 1" class="input-field">
+      </div>
+      <button type="submit" class="mt-2 bg-teal hover:bg-teal/90 text-white font-bold py-2.5 rounded-xl transition active:scale-95">
+        Crear Mesa
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ MODAL: INICIAR SESIÓN CIBER ============ -->
+<div id="modal-sesion-ciber" class="modal-overlay hidden">
+  <div class="modal-card animate-slideUp">
+    <div class="flex items-center justify-between mb-4">
+      <h3 id="sesion-ciber-title" class="text-lg font-bold text-dark333">Iniciar sesión</h3>
+      <button class="modal-close text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+    <form id="form-sesion-ciber" class="flex flex-col gap-3">
+      <input type="hidden" id="sc-estacion-id">
+      <div>
+        <label class="text-xs font-semibold text-greym">Cliente (opcional)</label>
+        <input id="sc-cliente" type="text" class="input-field">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-greym">Minutos *</label>
+          <input id="sc-minutos" type="number" min="1" value="60" required class="input-field">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-greym">Precio por hora *</label>
+          <input id="sc-precio-hora" type="number" step="0.01" min="0" value="1" required class="input-field">
+        </div>
+      </div>
+      <button type="submit" class="mt-2 bg-teal hover:bg-teal/90 text-white font-bold py-2.5 rounded-xl transition active:scale-95">
+        Iniciar
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ MODAL: NUEVA ESTACIÓN ============ -->
+<div id="modal-nueva-estacion" class="modal-overlay hidden">
+  <div class="modal-card animate-slideUp">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold text-dark333">Nueva Estación</h3>
+      <button class="modal-close text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+    <form id="form-nueva-estacion" class="flex flex-col gap-3">
+      <div>
+        <label class="text-xs font-semibold text-greym">Nombre de la estación *</label>
+        <input id="ne-nombre" type="text" placeholder="Ej. PC 7" required class="input-field">
+      </div>
+      <button type="submit" class="mt-2 bg-teal hover:bg-teal/90 text-white font-bold py-2.5 rounded-xl transition active:scale-95">
+        Crear Estación
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ MODAL: SELECCIONAR VARIANTE (talla/modelo) ============ -->
+<div id="modal-variante" class="modal-overlay hidden">
+  <div class="modal-card animate-slideUp">
+    <div class="flex items-center justify-between mb-4">
+      <h3 id="variante-title" class="text-lg font-bold text-dark333">Elige modelo y talla</h3>
+      <button class="modal-close text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+    <div id="variante-lista" class="flex flex-col gap-2 max-h-72 overflow-y-auto"></div>
+  </div>
+</div>
+
+<!-- ============ MODAL: INGRESAR PESO (supermercado) ============ -->
+<div id="modal-servicio" class="modal-overlay hidden">
+  <div class="modal-card animate-slideUp">
+    <div class="flex items-center justify-between mb-4">
+      <h3 id="srv-title" class="text-lg font-bold text-dark333">Servicio</h3>
+      <button class="modal-close text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+    <form id="form-servicio" class="flex flex-col gap-3">
+      <div id="srv-info" class="text-xs text-greym"></div>
+      <div>
+        <label class="text-xs font-semibold text-greym">Precio de este trabajo (USD) *</label>
+        <input id="srv-precio" type="number" step="0.01" min="0" required class="input-field">
+        <div id="srv-precio-bs" class="text-[11px] text-primary font-semibold mt-0.5"></div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-greym">Detalle del trabajo (opcional)</label>
+        <input id="srv-detalle" type="text" class="input-field" placeholder="Ej. Camiseta talla M, diseño frontal">
+      </div>
+      <button type="submit" id="srv-btn" class="mt-2 bg-teal hover:bg-teal/90 text-white font-bold py-2.5 rounded-xl transition active:scale-95">Agregar al carrito</button>
+    </form>
+  </div>
+</div>
+
+<div id="modal-peso" class="modal-overlay hidden">
+  <div class="modal-card animate-slideUp">
+    <div class="flex items-center justify-between mb-4">
+      <h3 id="peso-title" class="text-lg font-bold text-dark333">Ingresar peso</h3>
+      <button class="modal-close text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+    <form id="form-peso" class="flex flex-col gap-3">
+      <div>
+        <label class="text-xs font-semibold text-greym">Peso (kg) *</label>
+        <input id="peso-valor" type="number" step="0.001" min="0.001" required class="input-field" placeholder="Ej. 0.350">
+      </div>
+      <div class="text-sm text-greym">Precio por kg: <span id="peso-precio-kg" class="font-semibold text-dark333"></span></div>
+      <div class="text-lg font-extrabold text-teal">Total: <span id="peso-total">$0.00</span></div>
+      <button type="submit" class="mt-2 bg-teal hover:bg-teal/90 text-white font-bold py-2.5 rounded-xl transition active:scale-95">
+        Agregar al carrito
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ MODAL: CLIENTE ============ -->
+<div id="modal-cliente" class="modal-overlay hidden">
+  <div class="modal-card animate-slideUp">
+    <div class="flex items-center justify-between mb-4">
+      <h3 id="modal-cliente-title" class="text-lg font-bold text-dark333">Nuevo Cliente</h3>
+      <button class="modal-close text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+    <form id="form-cliente" class="flex flex-col gap-3">
+      <input type="hidden" id="c-id">
+      <div>
+        <label class="text-xs font-semibold text-greym">Nombre *</label>
+        <input id="c-nombre" type="text" required class="input-field">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-greym">Cédula / RIF</label>
+        <input id="c-cedula" type="text" class="input-field">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-greym">Teléfono</label>
+        <input id="c-telefono" type="text" class="input-field">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-greym">Correo Electrónico *</label>
+        <input id="c-correo" type="email" class="input-field" placeholder="cliente@correo.com">
+      </div>
+      <button type="submit" class="mt-2 bg-teal hover:bg-teal/90 text-white font-bold py-2.5 rounded-xl transition active:scale-95">
+        Guardar Cliente
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ MODAL: HISTORIAL DE COMPRAS DEL CLIENTE ============ -->
+<div id="modal-historial-cliente" class="modal-overlay hidden">
+  <div class="modal-card animate-slideUp !max-w-lg">
+    <div class="flex items-center justify-between mb-4">
+      <h3 id="hist-cliente-title" class="text-lg font-bold text-dark333">Historial de compras</h3>
+      <button class="modal-close text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+
+    <div class="grid grid-cols-3 gap-2 mb-4">
+      <div class="bg-gray-50 rounded-lg p-2.5 text-center">
+        <div class="text-lg font-extrabold text-dark333" id="hist-cantidad-compras">0</div>
+        <div class="text-[10px] text-greym uppercase">Compras</div>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-2.5 text-center">
+        <div class="text-lg font-extrabold text-teal" id="hist-gasto-total">$0.00</div>
+        <div class="text-[10px] text-greym uppercase">Gasto total</div>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-2.5 text-center">
+        <div class="text-lg font-extrabold text-dark333" id="hist-frecuencia">-</div>
+        <div class="text-[10px] text-greym uppercase">Frecuencia (días)</div>
+      </div>
+    </div>
+
+    <div id="hist-recomendaciones" class="flex flex-col gap-2 mb-4"></div>
+
+    <div class="text-xs font-semibold text-greym uppercase mb-2">Compras recientes</div>
+    <div id="hist-ventas-lista" class="flex flex-col gap-2 max-h-56 overflow-y-auto pr-1"></div>
+    <div id="hist-ventas-vacio" class="hidden text-sm text-greym text-center py-6">Este cliente aún no tiene compras registradas.</div>
+  </div>
+</div>
+
+<!-- ============ MODAL: RESUMEN DE CIERRE DE CAJA ============ -->
+<div id="modal-resumen-caja" class="modal-overlay hidden" data-no-outside-close="true">
+  <div class="modal-card animate-slideUp">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold text-dark333">Cierre de Caja</h3>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <div class="bg-gray-50 rounded-xl p-3 text-center">
+        <div class="text-xl font-extrabold text-teal" id="cierre-total">$0.00</div>
+        <div class="text-[10px] text-greym uppercase">Total vendido</div>
+      </div>
+      <div class="bg-gray-50 rounded-xl p-3 text-center">
+        <div class="text-xl font-extrabold text-dark333" id="cierre-cantidad">0</div>
+        <div class="text-[10px] text-greym uppercase">Facturas emitidas</div>
+      </div>
+    </div>
+    <div class="relative mb-4" style="height: 160px;">
+      <canvas id="grafico-cierre-canvas"></canvas>
+    </div>
+    <div id="cierre-vacio" class="hidden text-center text-sm text-greym py-6">No se registraron ventas durante esta sesión de caja.</div>
+    <button id="btn-confirmar-cierre-caja" class="w-full bg-accent hover:bg-accent/90 text-white font-bold py-2.5 rounded-xl transition active:scale-95">
+      Confirmar Cierre de Caja
+    </button>
+  </div>
+</div>
+
+<!-- ============ MODAL: CÓDIGO DE EMPRESA GENERADO (tras registrar) ============ -->
+<!-- ============ MODAL: PREVISUALIZACIÓN DE FACTURA (PDF embebido) ============
+     No se usa window.open(): dentro de la app de escritorio (pywebview) abrir
+     una ventana nueva del navegador es poco fiable (bloqueada o inconsistente
+     según el sistema operativo). El PDF se muestra embebido en un <iframe>
+     dentro de la propia app, con imprimir/descargar como acciones directas. -->
+<!-- ============ MODAL: MÉTODO DE PAGO (uso genérico, ej. cobro de tiempo en Ciber) ============ -->
+<!-- ============ MODAL: HISTORIAL DE SESIONES DE CIBER ============ -->
+<div id="modal-historial-ciber" class="modal-overlay hidden">
+  <div class="modal-card animate-slideUp !max-w-lg">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold text-dark333">Historial de sesiones</h3>
+      <button class="modal-close text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+    <div id="hist-ciber-lista" class="flex flex-col gap-2 max-h-[60vh] overflow-y-auto pr-1"></div>
+  </div>
+</div>
+
+<div id="modal-metodo-pago-generico" class="modal-overlay hidden">
+  <div class="modal-card animate-slideUp">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold text-dark333">Método de pago</h3>
+      <button class="modal-close text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+    <p id="mpg-descripcion" class="text-sm text-greym mb-3"></p>
+    <select id="mpg-select" class="input-field mb-3">
+      <option value="">Selecciona un método de pago...</option>
+      
+      <option value="efectivo_usd">Efectivo (USD)</option>
+      
+      <option value="efectivo_bs">Efectivo (Bs)</option>
+      
+      <option value="pago_movil">Pago Móvil</option>
+      
+      <option value="transferencia">Transferencia bancaria</option>
+      
+      <option value="punto_venta">Punto de venta (débito/crédito)</option>
+      
+      <option value="zelle">Zelle</option>
+      
+      <option value="binance">Binance / USDT</option>
+      
+    </select>
+    <button id="mpg-confirmar" class="w-full bg-teal hover:bg-teal/90 text-white font-bold py-2.5 rounded-xl transition active:scale-95">Confirmar y Facturar</button>
+  </div>
+</div>
+
+<div id="modal-preview-factura" class="modal-overlay hidden">
+  <div class="modal-card animate-slideUp !max-w-3xl" style="height: 85vh;">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-lg font-bold text-dark333">Factura generada</h3>
+      <button class="modal-close text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+    <div class="flex-1 rounded-xl overflow-hidden border border-gray-200 bg-gray-50" style="height: calc(100% - 110px);">
+      <iframe id="preview-factura-iframe" class="w-full h-full" style="border:0;"></iframe>
+      <div id="preview-factura-fallback" class="hidden h-full flex-col items-center justify-center text-center p-6 gap-3">
+        <p class="text-sm text-greym">Tu navegador no pudo mostrar la vista previa del PDF aquí, pero la factura se generó correctamente.</p>
+        <a id="preview-factura-fallback-link" href="#" target="_blank" class="bg-primary text-white font-semibold px-4 py-2 rounded-xl text-sm">Abrir factura</a>
+      </div>
+    </div>
+    <div class="flex gap-2 mt-3">
+      <button id="btn-preview-imprimir" class="flex-1 bg-primary/10 text-primary font-bold py-2.5 rounded-xl transition active:scale-95 hover:bg-primary/20">🖨️ Imprimir</button>
+      <a id="btn-preview-descargar" href="#" target="_blank" class="flex-1 text-center bg-teal hover:bg-teal/90 text-white font-bold py-2.5 rounded-xl transition active:scale-95">⬇️ Abrir / Descargar</a>
+      <button id="btn-preview-whatsapp" class="flex-1 bg-[#25D366]/10 text-[#128C7E] font-bold py-2.5 rounded-xl transition active:scale-95 hover:bg-[#25D366]/20">📲 WhatsApp</button>
+    </div>
+    <button id="btn-preview-ticket58" class="hidden w-full mt-2 text-xs text-primary hover:underline font-semibold">🧾 Ver / imprimir ticket térmico 58mm</button>
+  </div>
+</div>
+
+<div id="modal-wa-imagen" class="modal-overlay hidden">
+  <div class="modal-card animate-slideUp !max-w-sm">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-lg font-bold text-dark333">Falta un paso: la imagen</h3>
+      <button class="modal-close text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+    <div class="space-y-3 text-sm text-dark333">
+      <div class="flex gap-2"><span>✅</span><span>Se abrió WhatsApp con el mensaje de la factura.</span></div>
+      <div class="flex gap-2"><span>🖼️</span><span>La <b>imagen de la factura ya está copiada</b>.</span></div>
+      <ol class="list-decimal pl-5 space-y-1 text-[13px]">
+        <li>En WhatsApp, haz clic en el cuadro de mensaje.</li>
+        <li>Presiona <b>Ctrl + V</b>: aparece la imagen.</li>
+        <li>Presiona <b>Enter</b> para enviar.</li>
+      </ol>
+      <p id="wa-img-auto" class="hidden text-[11px] text-greym">Se intentará pegar (y enviar, si lo activaste) sola en unos segundos; si no aparece, haz los pasos a mano.</p>
+      <div class="flex flex-wrap gap-2 pt-1">
+        <button type="button" id="btn-wa-registro" class="flex-1 bg-gray-100 hover:bg-gray-200 text-dark333 font-semibold py-2.5 rounded-xl text-xs transition">Ver registro de errores</button>
+        <button type="button" id="btn-wa-recopiar" class="flex-1 bg-gray-100 hover:bg-gray-200 text-dark333 font-semibold py-2.5 rounded-xl text-xs transition">Copiar la imagen otra vez</button>
+        <button type="button" class="modal-close flex-1 bg-primary text-white font-bold py-2.5 rounded-xl text-sm transition">Listo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-whatsapp" class="modal-overlay hidden">
+  <div class="modal-card animate-slideUp !max-w-sm">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-lg font-bold text-dark333">Enviar factura por WhatsApp</h3>
+      <button class="modal-close text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+    <form id="form-whatsapp" class="flex flex-col gap-3">
+      <div>
+        <label class="text-xs font-semibold text-greym">Número de WhatsApp del cliente</label>
+        <input id="whatsapp-telefono" type="tel" required class="input-field" placeholder="0412-1234567">
+      </div>
+      <p class="text-[11px] text-greym leading-relaxed">
+        Se abrirá WhatsApp de escritorio y FacturaK enviará <b>el mensaje y la imagen de la factura</b> automáticamente
+        (también se guarda en Documentos\FacturaK\Facturas). Durante unos segundos no uses el teclado ni el mouse.
+      </p>
+      <div id="whatsapp-vel-wrap" class="flex items-center gap-2 text-xs text-dark333">
+        <span>Velocidad de mi WhatsApp:</span>
+        <select id="whatsapp-velocidad" class="input-field !py-1 !w-auto text-xs"><option value="1">Normal</option><option value="1.8">Lenta</option><option value="2.6">Muy lenta</option></select>
+      </div>
+      <label id="whatsapp-pegar-wrap" class="flex items-start gap-2 text-xs text-greym cursor-pointer">
+        <input type="checkbox" id="whatsapp-manual" class="rounded accent-teal mt-0.5">
+        <span>Modo manual (no automático): yo pego la imagen con Ctrl+V</span>
+      </label>
+      <button type="submit" class="bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-2.5 rounded-xl transition active:scale-95">Abrir WhatsApp</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ MODAL: TICKET TÉRMICO 58MM ============ -->
+<div id="modal-preview-ticket58" class="modal-overlay hidden">
+  <div class="modal-card animate-slideUp !max-w-xs" style="height: 85vh;">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-lg font-bold text-dark333">Ticket 58mm</h3>
+      <button class="modal-close text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+    <div class="flex-1 rounded-xl overflow-hidden border border-gray-200 bg-gray-50" style="height: calc(100% - 150px);">
+      <iframe id="preview-ticket58-iframe" class="w-full h-full" style="border:0;"></iframe>
+    </div>
+    <button id="btn-ticket58-imprimir" class="w-full mt-3 bg-primary/10 text-primary font-bold py-2.5 rounded-xl transition active:scale-95 hover:bg-primary/20">🖨️ Imprimir ticket</button>
+    <button id="btn-ticket58-cargar-cae" class="w-full mt-2 text-xs text-greym hover:text-primary font-semibold">Cargar / editar número de CAE</button>
+  </div>
+</div>
+
+<!-- ============ MODAL: CARGAR CAE (comprobante fiscal) ============ -->
+<div id="modal-cargar-cae" class="modal-overlay hidden">
+  <div class="modal-card animate-slideUp">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold text-dark333">Cargar CAE</h3>
+      <button class="modal-close text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+    <p class="text-xs text-greym mb-3">Ingresa el CAE ya obtenido por tu vía fiscal habitual para esta factura. El QR fiscal solo se genera si hay un CAE cargado.</p>
+    <form id="form-cargar-cae" class="flex flex-col gap-3">
+      <div>
+        <label class="text-xs font-semibold text-greym">Número de CAE *</label>
+        <input id="cae-numero" type="text" required class="input-field" placeholder="71234567891234">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-greym">Fecha de vencimiento del CAE</label>
+        <input id="cae-vencimiento" type="text" class="input-field" placeholder="12/09/2026">
+      </div>
+      <button type="submit" class="bg-teal hover:bg-teal/90 text-white font-bold py-2.5 rounded-xl transition active:scale-95">Guardar CAE</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ MODAL: COMANDA DE COCINA (ticket para imprimir) ============
+     Este modal se abre POR ENCIMA de "modal-cuenta-mesa", que debe seguir
+     abierto debajo para poder cerrar la mesa después. Por eso su botón de
+     cierre NO usa la clase genérica ".modal-close" (que oculta TODOS los
+     modales a la vez vía closeModals()) — solo se cierra a sí mismo. -->
+<div id="modal-comanda" class="modal-overlay hidden" data-no-outside-close="true">
+  <div class="modal-card animate-slideUp !max-w-sm">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-lg font-bold text-dark333">Comanda enviada</h3>
+      <button id="btn-cerrar-modal-comanda" class="text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+    <div id="comanda-preview" class="border border-dashed border-gray-300 rounded-xl p-4 font-mono text-xs bg-gray-50 max-h-[50vh] overflow-y-auto"></div>
+    <button id="btn-comanda-imprimir" class="w-full mt-3 bg-primary/10 text-primary font-bold py-2.5 rounded-xl transition active:scale-95 hover:bg-primary/20">🖨️ Reimprimir comanda</button>
+  </div>
+</div>
+
+<div id="modal-codigo-empresa" class="modal-overlay hidden" data-no-outside-close="true">
+  <div class="modal-card animate-slideUp text-center">
+    <div class="w-12 h-12 rounded-xl bg-teal/10 text-teal flex items-center justify-center mx-auto mb-3 text-2xl">🏢</div>
+    <h3 class="text-lg font-bold text-dark333 mb-1">¡Tu empresa fue creada!</h3>
+    <p class="text-xs text-greym mb-4 leading-relaxed">
+      Guarda este <b>código de empresa</b>: lo necesitarás, junto con tu usuario y contraseña,
+      cada vez que quieras iniciar sesión. Si lo pierdes, no podrás acceder a tu cuenta.
+    </p>
+    <div class="bg-primary/5 border border-primary/20 rounded-xl py-3 px-4 mb-4">
+      <div id="codigo-empresa-valor" class="text-2xl font-extrabold text-primary tracking-wider font-mono">FK-000000</div>
+    </div>
+    <div class="flex gap-2">
+      <button id="btn-copiar-codigo-empresa" class="flex-1 bg-primary/10 text-primary font-semibold py-2.5 rounded-xl transition active:scale-95 hover:bg-primary/20">
+        Copiar código
+      </button>
+      <button id="btn-continuar-codigo-empresa" class="flex-1 bg-teal hover:bg-teal/90 text-white font-bold py-2.5 rounded-xl transition active:scale-95">
+        Ya lo guardé, continuar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: OPCIONES DE CAJA (tasa / cierre) ============ -->
+<div id="modal-caja-opciones" class="modal-overlay hidden">
+  <div class="modal-card animate-slideUp !max-w-sm">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold text-dark333">💵 Caja del día</h3>
+      <button class="modal-close text-greym hover:text-accent text-xl leading-none">&times;</button>
+    </div>
+    <div id="co-info" class="flex flex-col gap-1.5 text-sm bg-gray-50 rounded-xl p-3 mb-4"></div>
+    <form id="form-actualizar-tasa" class="flex gap-2 items-end mb-4">
+      <div class="flex-1">
+        <label class="text-xs font-semibold text-greym">Actualizar tasa del dólar (Bs)</label>
+        <input id="co-tasa" type="number" step="0.01" min="0.01" required class="input-field">
+      </div>
+      <button type="submit" class="bg-primary hover:bg-primary/90 text-white font-semibold px-4 py-2.5 rounded-xl transition active:scale-95">Actualizar</button>
+    </form>
+    <button id="btn-cerrar-caja" class="w-full bg-accent/10 text-accent hover:bg-accent/20 font-bold py-2.5 rounded-xl transition active:scale-95">Cerrar caja…</button>
+  </div>
+</div>
+
+<!-- ============ MODAL: CONFIRMACIÓN ============ -->
+<div id="modal-confirm" class="modal-overlay hidden" data-no-outside-close="true">
+  <div class="modal-card animate-slideUp !max-w-sm">
+    <h3 id="confirm-titulo" class="text-lg font-bold text-dark333 mb-2">Confirmar</h3>
+    <p id="confirm-mensaje" class="text-sm text-greym mb-5 leading-relaxed"></p>
+    <div class="flex gap-2">
+      <button id="confirm-cancelar" class="flex-1 bg-gray-100 hover:bg-gray-200 text-dark333 font-semibold py-2.5 rounded-xl transition">Cancelar</button>
+      <button id="confirm-ok" class="flex-1 bg-teal hover:bg-teal/90 text-white font-bold py-2.5 rounded-xl transition active:scale-95">Aceptar</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/native-bridge.js"></script>
+<script src="vendor/xlsx.full.min.js"></script>
+<script src="js/catalogos.js"></script>
+<script src="vendor/socket.io.min.js"></script>
+<script src="js/sync-core.js"></script>
+<script src="js/core.js"></script>
+<script src="js/red.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/qr.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/app.js"></script>
+<script src="js/modulos.js"></script>
+<script src="js/creditos.js"></script>
+<script src="js/tema.js"></script>
+<script src="js/nube-ui.js"></script>
+<script src="js/mensajes-ui.js"></script>
+<script src="js/api-ui.js"></script>
+<script src="js/importar-core.js"></script>
+<script src="js/importar.js"></script>
+<script src="js/red-ui.js"></script>
+  <script src="js/movil.js"></script>
+  <script src="js/pedidos.js"></script>
+</body>
+</html>

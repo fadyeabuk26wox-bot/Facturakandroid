@@ -1,0 +1,25 @@
+{
+  "name": "facturak-android",
+  "version": "1.8.0",
+  "private": true,
+  "scripts": {
+    "sync": "cap sync android",
+    "open": "cap open android",
+    "build:debug": "cd android && ./gradlew assembleDebug",
+    "build:bridge": "esbuild native-src/bridge.js --bundle --outfile=www/js/native-bridge.js --format=iife --platform=browser"
+  },
+  "dependencies": {
+    "@ascentio-it/capacitor-bluetooth-serial": "8.0.1",
+    "@capacitor-mlkit/barcode-scanning": "8.2.1",
+    "@capacitor/android": "8.5.2",
+    "@capacitor/app": "8.1.1",
+    "@capacitor/camera": "8.2.4",
+    "@capacitor/core": "8.5.2",
+    "@capacitor/filesystem": "8.1.3",
+    "@capacitor/preferences": "8.0.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.2",
+    "esbuild": "^0.25.0"
+  }
+}

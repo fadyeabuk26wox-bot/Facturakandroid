@@ -1,0 +1,44 @@
+/* FacturaK — utilidades que usan las pantallas nuevas y no vienen en el
+   Tailwind compilado de la app (tailwind.min.css es un subconjunto). */
+.\!w-auto{width:auto!important}
+.col-span-4{grid-column:span 4/span 4}
+.h-2{height:.5rem}
+.top-1{top:.25rem}.left-1{left:.25rem}
+.-mt-1{margin-top:-.25rem}.mt-6{margin-top:1.5rem}.mb-0\.5{margin-bottom:.125rem}
+.pl-5{padding-left:1.25rem}.pr-3{padding-right:.75rem}.pt-2{padding-top:.5rem}
+.gap-x-4{column-gap:1rem}.gap-x-5{column-gap:1.25rem}.gap-y-2{row-gap:.5rem}
+.justify-end{justify-content:flex-end}
+.max-w-2xl{max-width:42rem}.max-w-3xl{max-width:48rem}
+.min-w-\[180px\]{min-width:180px}
+.overflow-auto{overflow:auto}.overflow-x-auto{overflow-x:auto}
+.list-decimal{list-style-type:decimal}
+.decoration-dotted{text-decoration-style:dotted}
+.text-\[13px\]{font-size:13px}
+.transition-transform{transition-property:transform;transition-duration:.15s;transition-timing-function:cubic-bezier(.4,0,.2,1)}
+.space-y-0\.5>:not([hidden])~:not([hidden]){margin-top:.125rem}
+.space-y-1>:not([hidden])~:not([hidden]){margin-top:.25rem}
+.space-y-3>:not([hidden])~:not([hidden]){margin-top:.75rem}
+.space-y-4>:not([hidden])~:not([hidden]){margin-top:1rem}
+.space-y-5>:not([hidden])~:not([hidden]){margin-top:1.25rem}
+/* colores */
+.bg-accent\/15{background-color:rgb(var(--c-peligro)/.15)}
+.hover\:bg-teal\/20:hover{background-color:rgb(var(--c-secundario)/.2)}
+.bg-sky-100{background-color:#e0f2fe}.text-sky-700{color:#0369a1}
+.bg-amber-50\/60{background-color:rgb(255 251 235/.6)}
+.bg-sky-50\/60{background-color:rgb(240 249 255/.6)}
+.bg-\[\#25D366\]{background-color:#25d366}
+.bg-\[\#25D366\]\/10{background-color:rgb(37 211 102/.1)}
+.hover\:bg-\[\#25D366\]\/20:hover{background-color:rgb(37 211 102/.2)}
+.hover\:bg-\[\#20bd5a\]:hover{background-color:#20bd5a}
+.text-\[\#128C7E\]{color:#128c7e}
+@media (min-width:640px){
+  .sm\:col-span-4{grid-column:span 4/span 4}
+  .sm\:col-span-5{grid-column:span 5/span 5}
+}
+
+/* ===== Pedidos (v1.8) ===== */
+.fk-ic { position: relative; display: inline-flex; flex: 0 0 auto; }
+.fk-badge { position: absolute; top: -6px; right: -9px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px; background: #E63946; color: #fff; font-size: 10px; font-weight: 800; line-height: 17px; text-align: center; display: none; box-shadow: 0 0 0 2px rgba(0,0,0,.08); }
+.fk-badge.on { display: block; }
+.fk-aviso { background: #FFF7E0; border: 1px solid #F5D98A; color: #7A5A00; }
+.fk-nota { background: #FFF7E0; color: #7A5A00; }

@@ -1,0 +1,140 @@
+/* FacturaK Android — ajustes para teléfono y tablet (se carga después de style.css) */
+
+/* Alto real de pantalla en Android (100vh incluye la barra del navegador) */
+#app-shell { height: 100vh; height: 100dvh; }
+
+/* Zonas seguras (notch / barra de gestos) */
+body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+
+/* Áreas táctiles cómodas y sin zoom automático al enfocar campos */
+button, .nav-btn, .btn, select { min-height: 44px; }
+input, select, textarea, .input-field { font-size: 16px; }
+* { -webkit-tap-highlight-color: transparent; }
+html, body { overscroll-behavior: none; }
+
+/* ===== TELÉFONO (< 640px): la barra lateral pasa a barra inferior ===== */
+@media (max-width: 639px) {
+  #app-shell > .flex.flex-1.overflow-hidden { flex-direction: column-reverse; }
+  #app-shell aside {
+    width: 100% !important; flex-direction: row !important;
+    border-top: 1px solid rgba(255,255,255,.15);
+  }
+  #app-shell aside > div:first-child { display: none; }            /* logo K del sidebar */
+  #app-shell aside nav {
+    flex-direction: row !important; padding: 4px 6px !important; gap: 2px !important;
+    overflow-x: auto; overflow-y: hidden; width: 100%;
+  }
+  #app-shell aside .nav-btn {
+    flex: 0 0 auto; flex-direction: column; gap: 2px; padding: 6px 12px !important; min-width: 64px;
+    justify-content: center;
+  }
+  #app-shell aside .nav-btn span { display: inline !important; font-size: 10px; line-height: 1.1; }
+  #app-shell aside > button, #app-shell aside > div:last-child { display: none; }
+  #app-shell main { padding: 10px !important; }
+  .modal-card { max-width: 100vw !important; width: 100vw; max-height: 92dvh; border-radius: 20px 20px 0 0; margin-top: auto; }
+  .modal-overlay { align-items: flex-end !important; padding: 0 !important; }
+  #btn-tasa-badge { left: 8px; font-size: 10px; padding: 4px 8px; }
+  #btn-logout { right: 8px; }
+  table { font-size: 12px; }
+}
+
+/* ===== TABLET (640–1279px): POS en dos columnas, catálogo más grande ===== */
+@media (min-width: 640px) and (max-width: 1279px) {
+  #tab-pos { grid-template-columns: minmax(0, 3fr) minmax(300px, 2fr) !important; }
+  #tab-pos > .xl\:col-span-2, #tab-pos > .xl\:col-span-1 { grid-column: auto !important; }
+  #pos-products-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  #app-shell aside { width: 5rem; }
+}
+/* Tablet en vertical: el carrito pasa debajo del catálogo */
+@media (min-width: 640px) and (max-width: 899px) and (orientation: portrait) {
+  #tab-pos { grid-template-columns: 1fr !important; }
+}
+
+
+/* ===== FacturaK v1.7: facturación e inventario cómodos con el dedo ===== */
+#btn-carrito-flotante { display: none; }
+@media (max-width: 899px), (pointer: coarse) {
+  /* POS: catálogo en 2 columnas con tarjetas grandes; cantidades fáciles de tocar */
+  #pos-products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
+  #pos-products-grid > * { min-height: 120px; }
+  #cart-items button[data-act] { min-width: 40px; min-height: 40px; font-size: 18px; border-radius: 12px; }
+  #cart-items { max-height: none !important; }
+  #pos-tipo-tabs { flex-wrap: nowrap !important; overflow-x: auto; padding-bottom: 4px; }
+  #pos-tipo-tabs > * { flex: 0 0 auto; }
+  #btn-generar-factura { min-height: 52px; font-size: 16px; position: sticky; bottom: 8px; z-index: 5; }
+  #pos-search { min-height: 48px; }
+  /* Inventario: una tarjeta por fila, botones grandes */
+  #inventario-grid { grid-template-columns: 1fr !important; }
+  #inventario-grid button { min-height: 44px; }
+  #inv-subtabs { flex-wrap: nowrap !important; overflow-x: auto; padding-bottom: 4px; }
+  #inv-subtabs > * { flex: 0 0 auto; }
+  /* Resumen flotante del carrito (solo teléfono / tablet) */
+  #btn-carrito-flotante:not(.hidden) {
+    display: block; position: fixed; right: 12px; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: 9999; white-space: nowrap;
+    background: #0b4f9c !important; opacity: 1 !important; color: #fff !important; font-weight: 800; font-size: 14px; border: 0;
+    padding: 12px 18px; border-radius: 999px; box-shadow: 0 6px 18px rgba(0,0,0,.28);
+  }
+}
+
+
+/* ===== FacturaK v1.7.1: teléfono limpio, sin cortes y adaptable a cualquier pantalla ===== */
+html, body { max-width: 100%; overflow-x: hidden; }
+img, video, canvas, svg { max-width: 100%; }
+#app-shell main, #app-shell main * { min-width: 0; }
+#app-shell main { overflow-x: hidden; }
+
+@media (max-width: 899px) {
+  /* Tablas → tarjetas (cada fila una tarjeta, "Columna: valor") */
+  table.fk-tabla, table.fk-tabla tbody, table.fk-tabla tr, table.fk-tabla td { display: block; width: 100% !important; }
+  table.fk-tabla thead { display: none; }
+  table.fk-tabla tbody tr {
+    border: 1px solid rgba(0,0,0,.07); border-radius: 14px; margin: 0 0 10px; padding: 6px 12px; background: #fff;
+  }
+  table.fk-tabla tbody tr.fk-fila-vacia { border: 0; background: transparent; text-align: center; }
+  table.fk-tabla td {
+    display: flex !important; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 7px 0 !important; border: 0 !important; text-align: right !important; word-break: break-word;
+  }
+  table.fk-tabla td[data-label]::before {
+    content: attr(data-label); flex: 0 0 38%; max-width: 38%; text-align: left; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .02em; color: #7a8594;
+  }
+  table.fk-tabla td > * { max-width: 62%; }
+  table.fk-tabla td:last-child { flex-wrap: wrap; justify-content: flex-end; }
+  table.fk-tabla td:last-child::before { flex-basis: 100%; max-width: 100%; }
+  table.fk-tabla td button { min-height: 40px; }
+  div:has(> table.fk-tabla) { overflow: visible !important; background: transparent !important; box-shadow: none !important; border: 0 !important; }
+
+  /* Filas de botones (inventario, reportes…): se ajustan en vez de salirse */
+  #tab-inventario .flex.gap-2, #tab-clientes .flex.gap-2, #tab-reportes .flex.gap-2 { flex-wrap: wrap; width: 100%; }
+  #tab-inventario .flex.gap-2 > button, #tab-clientes .flex.gap-2 > button { flex: 1 1 140px; padding-left: 12px !important; padding-right: 12px !important; font-size: 14px; }
+  /* Rejillas de 2+ columnas con datos: máximo 2 en teléfono, 1 en pantallas muy angostas */
+  #app-shell main .grid { min-width: 0; }
+  /* Títulos y textos que no caben: se parten, no se salen */
+  #app-shell main h1, #app-shell main h2, #app-shell main h3, #app-shell main p, #app-shell main label { overflow-wrap: anywhere; }
+  #app-shell main input, #app-shell main select, #app-shell main textarea { max-width: 100%; }
+}
+@media (max-width: 380px) {
+  #app-shell main { padding: 8px !important; }
+  #tab-pos #pos-products-grid { gap: 8px !important; }
+  #app-shell aside .nav-btn { min-width: 58px; padding: 6px 8px !important; }
+  #tab-inventario .flex.gap-2 > button { flex-basis: 100%; }
+}
+/* Pantallas bajas (teléfono en horizontal): barra de navegación más compacta */
+@media (max-height: 500px) and (max-width: 899px) {
+  #app-shell aside .nav-btn { padding: 3px 10px !important; min-height: 36px; }
+  #app-shell aside .nav-btn svg { width: 16px; height: 16px; }
+}
+
+/* Insignia de pedidos en la barra inferior */
+#app-shell aside .nav-btn span.fk-ic { display: inline-flex !important; font-size: inherit; }
+#app-shell aside .nav-btn span.fk-badge { display: none !important; font-size: 10px; }
+#app-shell aside .nav-btn span.fk-badge.on { display: block !important; }
+
+/* Carrito en teléfono: el nombre ocupa toda la primera línea; cantidad, subtotal y quitar van debajo */
+@media (max-width: 899px) {
+  #cart-items > div { flex-wrap: wrap; row-gap: 6px; }
+  #cart-items > div > .flex-1 { flex: 1 0 100%; }
+  #cart-items > div > .flex-1 > div { white-space: normal; overflow: visible; text-overflow: clip; }
+  #cart-items > div > div:not(.flex-1):not(.flex) { margin-left: auto; width: auto; }
+}

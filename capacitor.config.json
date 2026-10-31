@@ -1,0 +1,17 @@
+{
+  "appId": "com.facturak.app",
+  "appName": "FacturaK",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 800
+    }
+  },
+  "server": {
+    "androidScheme": "http",
+    "cleartext": true
+  }
+}
