@@ -5,6 +5,9 @@ on:
     branches: [impresora]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -35,3 +38,17 @@ jobs:
           path: |
             impresora/dist/ServicioImpresoraFacturaK.exe
             impresora/instalador/Instalar_FacturaK_Impresora.exe
+
+      - name: Guardar binarios en la rama impresora-binarios
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+          mkdir ../salida
+          cp impresora/dist/ServicioImpresoraFacturaK.exe impresora/instalador/Instalar_FacturaK_Impresora.exe ../salida/
+          cd ../salida
+          git init -q -b impresora-binarios
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -q -m "Binarios compilados"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" impresora-binarios
